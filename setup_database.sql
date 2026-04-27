@@ -137,3 +137,19 @@ CREATE POLICY "Enable all access for anons on disposisi" ON public.disposisi FOR
 CREATE POLICY "Enable all access for anons on tracking_kinerja" ON public.tracking_kinerja FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Enable all access for anons on dokumen_referensi" ON public.dokumen_referensi FOR ALL USING (true) WITH CHECK (true);
 CREATE POLICY "Enable all access for anons on app_tasks" ON public.app_tasks FOR ALL USING (true) WITH CHECK (true);
+
+-- 10. Tabel referensi konfigurasi aplikasi
+CREATE TABLE IF NOT EXISTS public.app_settings (
+    id TEXT PRIMARY KEY DEFAULT 'global',
+    app_name TEXT DEFAULT 'SIMANDAT',
+    app_logo TEXT DEFAULT '',
+    primary_color TEXT DEFAULT '#4f46e5',
+    wa_api_key TEXT,
+    gemini_api_key TEXT,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Enable all access for anons on app_settings" ON public.app_settings FOR ALL USING (true) WITH CHECK (true);
+
+INSERT INTO public.app_settings (id, app_name) VALUES ('global', 'SIMANDAT') ON CONFLICT DO NOTHING;

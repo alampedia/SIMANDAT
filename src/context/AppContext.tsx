@@ -61,7 +61,7 @@ interface AppContextType {
 
 
 const initialConfig: AppConfig = {
-  appName: 'SI-MANDAT',
+  appName: 'SIMANDAT',
   appLogo: '',
   primaryColor: '#4f46e5', // Indigo 600
   waApiKey: '',
@@ -83,6 +83,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', config.primaryColor);
+    document.title = config.appName || 'SIMANDAT';
+    if (config.appLogo) {
+      let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
+      if (!link) {
+        link = document.createElement('link');
+        link.rel = 'icon';
+        document.head.appendChild(link);
+      }
+      link.href = config.appLogo;
+    }
     
     // Load users from Supabase if configured
     const loadUsers = async () => {
@@ -198,9 +208,70 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logout = () => setUser(null);
 
-  const updateConfig = (newConfig: Partial<AppConfig>) => {
-    setConfigState(prev => ({ ...prev, ...newConfig }));
+  // Update config and store it in localStorage and optionally Supabase
+  const updateConfig = async (newConfig: Partial<AppConfig>) => {
+    const combinedConfig = { ...config, ...newConfig };
+    setConfigState(combinedConfig);
+    localStorage.setItem('simandat_config', JSON.stringify(combinedConfig));
+    
+    // Save to Supabase DB if credentials let us
+    if (combinedConfig.supabaseUrl && combinedConfig.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(combinedConfig.supabaseUrl, combinedConfig.supabaseKey);
+        
+        await supabase.from('app_settings').upsert({
+           id: 'global',
+           app_name: combinedConfig.appName,
+           app_logo: combinedConfig.appLogo || '',
+           primary_color: combinedConfig.primaryColor,
+           wa_api_key: combinedConfig.waApiKey,
+           gemini_api_key: combinedConfig.geminiApiKey,
+           updated_at: new Date().toISOString()
+        });
+      } catch (err) {
+        console.error("Failed to save config to DB", err);
+      }
+    }
   };
+
+  // On mount, load config from localStorage first, then from app_settings
+  useEffect(() => {
+    let currentConfig = initialConfig;
+    const localStore = localStorage.getItem('simandat_config');
+    if (localStore) {
+      try {
+        currentConfig = { ...initialConfig, ...JSON.parse(localStore) };
+        setConfigState(currentConfig);
+      } catch (err) {}
+    }
+
+    const loadConfigFromDb = async () => {
+       if (currentConfig.supabaseUrl && currentConfig.supabaseKey) {
+         try {
+           const { createClient } = await import('@supabase/supabase-js');
+           const supabase = createClient(currentConfig.supabaseUrl, currentConfig.supabaseKey);
+           
+           const { data, error } = await supabase.from('app_settings').select('*').eq('id', 'global').single();
+           if (!error && data) {
+             const serverConfig = {
+               ...currentConfig,
+               appName: data.app_name || currentConfig.appName,
+               appLogo: data.app_logo || '',
+               primaryColor: data.primary_color || currentConfig.primaryColor,
+               waApiKey: data.wa_api_key || '',
+               geminiApiKey: data.gemini_api_key || '',
+             };
+             setConfigState(serverConfig);
+             localStorage.setItem('simandat_config', JSON.stringify(serverConfig));
+           }
+         } catch (err) {
+           console.error("Failed to load config from DB", err);
+         }
+       }
+    };
+    loadConfigFromDb();
+  }, []);
 
   const refreshTasks = async () => {
     if (config.supabaseUrl && config.supabaseKey) {
