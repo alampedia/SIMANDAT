@@ -1,0 +1,367 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+
+// --- Types ---
+export type UserRole = 'admin' | 'camat' | 'sekcam' | 'kasi' | 'staf_agenda' | 'staf_pelaksana';
+
+export interface User {
+  id: string;
+  username: string; // Used as NIP
+  name: string;
+  role: UserRole;
+  title: string;
+  tupoksi?: string;
+}
+
+export interface AppConfig {
+  appName: string;
+  appLogo: string;
+  primaryColor: string;
+  waApiKey: string;
+  geminiApiKey: string;
+  supabaseUrl: string;
+  supabaseKey: string;
+}
+
+export interface DisposisiTask {
+  id: string;
+  nomorSurat?: string;
+  title: string;
+  sender: string;
+  date: string;
+  status: 'pending_sekcam' | 'pending_camat' | 'pending_target' | 'in_progress' | 'completed' | 'overdue';
+  priority?: string;
+  driveUrl?: string;
+  assignedTo?: string; // final target
+  instructions?: string;
+  notesCamat?: string;
+  notesSekcam?: string;
+  deadline?: string;
+  progress?: number;
+  history: { date: string; action: string; actor: string }[];
+}
+
+interface AppContextType {
+  user: User | null;
+  login: (username: string, pass: string) => Promise<boolean>;
+  logout: () => void;
+  config: AppConfig;
+  updateConfig: (newConfig: Partial<AppConfig>) => void;
+  tasks: DisposisiTask[];
+  addTask: (task: Omit<DisposisiTask, 'id' | 'history'>) => void;
+  updateTaskStatus: (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string) => void;
+  notifications: { id: string; message: string; read: boolean }[];
+  addNotification: (message: string) => void;
+  markNotificationsRead: () => void;
+  usersList: User[];
+}
+
+
+
+// Empty because dummy accounts are removed
+
+
+const initialConfig: AppConfig = {
+  appName: 'SI-MANDAT',
+  appLogo: '',
+  primaryColor: '#4f46e5', // Indigo 600
+  waApiKey: '',
+  geminiApiKey: '',
+  supabaseUrl: 'https://ftqwgnlpgiuxdpckxhsk.supabase.co',
+  supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cXdnbmxwZ2l1eGRwY2t4aHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjcyNjUsImV4cCI6MjA5MjgwMzI2NX0.kcQe5VYlzqaXycr2VYMwWtJgNgNuiEqXHiTayS-vTag',
+};
+
+const initialTasks: DisposisiTask[] = [];
+
+const AppContext = createContext<AppContextType | undefined>(undefined);
+
+export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [config, setConfigState] = useState<AppConfig>(initialConfig);
+  const [tasks, setTasks] = useState<DisposisiTask[]>(initialTasks);
+  const [notifications, setNotifications] = useState<{ id: string; message: string; read: boolean }[]>([]);
+  const [dbUsers, setDbUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty('--color-primary', config.primaryColor);
+    
+    // Load users from Supabase if configured
+    const loadUsers = async () => {
+      if (config.supabaseUrl && config.supabaseKey) {
+        try {
+          const { createClient } = await import('@supabase/supabase-js');
+          const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+          
+          const { data, error } = await supabase.from('pegawai').select('*');
+          if (!error && data) {
+            const mappedUsers: User[] = data.map((p: any) => ({
+              id: p.id,
+              username: p.nip,
+              name: p.nama,
+              role: p.role as UserRole,
+              title: p.jabatan,
+              tupoksi: p.tupoksi
+            }));
+            setDbUsers(mappedUsers);
+          }
+        } catch (err) {
+          console.error("Failed to load users from DB", err);
+        }
+      }
+    };
+    
+    loadUsers();
+  }, [config.primaryColor, config.supabaseUrl, config.supabaseKey]);
+
+  // Deadline checker
+  useEffect(() => {
+    if (!user) return;
+    const intervalId = setInterval(() => {
+      const now = new Date().getTime();
+      let alertTriggered = false;
+      tasks.forEach(t => {
+        // Find active tasks assigned to this user with a deadline that is < 12 hours from now and not completed
+        if ((t.assignedTo === user.name || t.assignedTo === user.username) && t.deadline && t.status !== 'completed' && t.status !== 'overdue') {
+          const deadlineTime = new Date(t.deadline).getTime();
+          const p = t.progress || 0;
+          const diffHour = (deadlineTime - now) / (1000 * 60 * 60);
+
+          if (diffHour > 0 && diffHour < 12 && p === 0) {
+            // Found a task near deadline with no progress
+            alertTriggered = true;
+            if (Notification.permission === 'granted') {
+              new Notification('Peringatan Disposisi', {
+                body: `Tugas "${t.title}" mendekati batas waktu (${diffHour.toFixed(1)} jam) namun belum ada progres!`,
+                icon: '/icon.png' // or whatever
+              });
+            }
+          }
+        }
+      });
+
+      if (alertTriggered) {
+        // Beep sound
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = 'square';
+        oscillator.frequency.value = 600; 
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        oscillator.start();
+        setTimeout(() => oscillator.stop(), 500);
+      }
+    }, 60 * 1000); // Check every minute
+
+    // Ask for notification permission on mount if logged in
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+      Notification.requestPermission();
+    }
+
+    return () => clearInterval(intervalId);
+  }, [user, tasks]);
+
+  const login = async (username: string, pass: string) => {
+    // Check supabase
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        const { data, error } = await supabase
+          .from('pegawai')
+          .select('*')
+          .eq('nip', username)
+          .eq('pass', pass)
+          .single();
+
+        if (!error && data) {
+          setUser({
+            id: data.id,
+            username: data.nip,
+            name: data.nama,
+            role: data.role as UserRole,
+            title: data.jabatan || 'Pengguna',
+            tupoksi: data.tupoksi
+          });
+          return true;
+        } else {
+           console.error('Login error from Supabase:', error ? error.message : 'User not found');
+        }
+      } catch (err) {
+        console.error('Supabase error:', err);
+      }
+    }
+
+    return false;
+  };
+
+  const logout = () => setUser(null);
+
+  const updateConfig = (newConfig: Partial<AppConfig>) => {
+    setConfigState(prev => ({ ...prev, ...newConfig }));
+  };
+
+  const refreshTasks = async () => {
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        const { data, error } = await supabase.from('app_tasks').select('*').order('created_at', { ascending: false });
+        if (error) throw error;
+        
+        if (data) {
+          const formattedTasks: DisposisiTask[] = data.map(t => ({
+            id: t.id,
+            nomorSurat: t.nomor_surat,
+            title: t.title,
+            sender: t.sender,
+            date: t.date,
+            status: t.status,
+            priority: t.priority,
+            driveUrl: t.drive_url,
+            assignedTo: t.assigned_to,
+            instructions: t.instructions,
+            notesCamat: t.notes_camat,
+            notesSekcam: t.notes_sekcam,
+            deadline: t.deadline,
+            progress: t.progress,
+            history: t.history || [],
+          }));
+          setTasks(formattedTasks);
+        }
+      } catch (err: any) {
+        console.error("Failed to load tasks from DB", err);
+      }
+    }
+  };
+
+  useEffect(() => {
+    refreshTasks();
+  }, [config.supabaseUrl, config.supabaseKey]);
+
+  const addTask = async (task: Omit<DisposisiTask, 'id' | 'history'>) => {
+    const id = `ND-${new Date().getTime().toString().slice(-4)}`;
+    const historyUpdate = { date: new Date().toISOString(), action: 'Naskah dibuat dan diteruskan ke Sekcam', actor: user?.name || 'Sistem' };
+    
+    // Default fallback locally
+    setTasks(prev => [{ id, ...task, history: [historyUpdate] }, ...prev]);
+
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        const { error } = await supabase.from('app_tasks').insert([{
+          id,
+          nomor_surat: task.nomorSurat,
+          title: task.title,
+          sender: task.sender,
+          date: task.date,
+          status: 'pending_sekcam',
+          priority: task.priority,
+          drive_url: task.driveUrl,
+          assigned_to: task.assignedTo,
+          instructions: task.instructions,
+          history: [historyUpdate]
+        }]);
+
+        if (error) throw error;
+        addNotification(`Naskah baru "${task.title}" berhasil dibuat dan disimpan di database.`);
+      } catch (err: any) {
+        console.error("DB Error on addTask", err);
+        addNotification(`Gagal menyimpan ke database Supabase: ${err.message}. Solusi: Cek format data atau pastikan url/key Supabase benar di Pengaturan.`);
+      }
+    } else {
+      addNotification(`Naskah berhasil dibuat (hanya tersimpan sementara karena database Supabase belum terkonfigurasi).`);
+    }
+  };
+
+  const updateTaskStatus = async (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string) => {
+    let actionMsg = `Status diubah ke ${newStatus}`;
+    if (newStatus === 'pending_camat') actionMsg = `Diteruskan ke Camat (Mapping oleh Sekcam)`;
+    if (newStatus === 'pending_target') actionMsg = `Disetujui Camat dan diteruskan ke Target`;
+    if (newStatus === 'in_progress') actionMsg = `Progres diperbarui${progress !== undefined ? ` (${progress}%)` : ''}`;
+    
+    const historyUpdate = { date: new Date().toISOString(), action: `${actionMsg}${note ? ' - Catatan: '+note : ''}`, actor: user?.name || 'Sistem' };
+    
+    // Find current task state for DB update
+    const currentTask = tasks.find(t => t.id === taskId);
+    if (!currentTask) return;
+
+    // Optimistically update
+    setTasks(prev => prev.map(t => {
+      if (t.id === taskId) {
+        return { 
+           ...t, 
+           status: newStatus,
+           ...(progress !== undefined ? { progress } : {}),
+           ...(note && newStatus === 'pending_camat' ? { notesSekcam: note } : {}),
+           ...(note && newStatus === 'pending_target' ? { notesCamat: note } : {}),
+           ...(deadline ? { deadline } : {}),
+           history: [...t.history, historyUpdate],
+           ...(assignedTo ? { assignedTo } : {})
+        };
+      }
+      return t;
+    }));
+
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        let updatePayload: any = {
+           status: newStatus,
+           history: [...currentTask.history, historyUpdate]
+        };
+        
+        if (progress !== undefined) updatePayload.progress = progress;
+        if (note && newStatus === 'pending_camat') updatePayload.notes_sekcam = note;
+        if (note && newStatus === 'pending_target') updatePayload.notes_camat = note;
+        if (deadline) updatePayload.deadline = deadline;
+        if (assignedTo) updatePayload.assigned_to = assignedTo;
+
+        const { error } = await supabase.from('app_tasks').update(updatePayload).eq('id', taskId);
+
+        if (error) throw error;
+        
+        if (newStatus !== 'in_progress') {
+           addNotification(`Status naskah berhasil diperbarui di database.`);
+        }
+      } catch (err: any) {
+        console.error("DB Error on updateTask", err);
+        addNotification(`Gagal mengupdate di database: ${err.message}. Data hanya tersimpan sementara.`);
+      }
+    } else {
+      if (newStatus !== 'in_progress') {
+         addNotification(`Status naskah berhasil diperbarui (hanya di memori karena Supabase belum diseting).`);
+      }
+    }
+  };
+
+  const addNotification = (message: string) => {
+    const id = Math.random().toString(36).substring(7);
+    setNotifications(prev => [{ id, message, read: false }, ...prev]);
+  };
+
+  const markNotificationsRead = () => {
+    setNotifications(prev => prev.map(n => ({...n, read: true})));
+  }
+
+  return (
+    <AppContext.Provider value={{
+      user, login, logout, config, updateConfig, tasks, addTask, updateTaskStatus, notifications, addNotification, markNotificationsRead, usersList: dbUsers
+    }}>
+      {children}
+    </AppContext.Provider>
+  );
+};
+
+export const useAppContext = () => {
+  const context = useContext(AppContext);
+  if (!context) throw new Error('useAppContext must be used within AppProvider');
+  return context;
+};
+
