@@ -30,11 +30,11 @@ export default function Chatbot() {
       let botReply = 'Maaf, saya tidak mengerti.';
       
       const lower = userMessage.toLowerCase();
-      if (lower.includes('mapping') || lower.includes('verifikasi') || lower.includes('sekcam') || lower.includes('validasi')) {
+      if (lower.includes('mapping') || lower.includes('verifikasi') || lower.includes('sekcam') || lower.includes('validasi') || lower.includes('kades') || lower.includes('kepala desa') || lower.includes('kabar') || lower.includes('lapor')) {
          addTask({
             nomorSurat: 'BOT-' + Math.floor(Math.random() * 10000),
-            title: `Perintah dari ${user?.name || user?.username || 'Pengguna'} (Chatbot)`,
-            sender: user?.name || user?.username || 'Pimpinan',
+            title: `Perintah/Kabar dari ${user?.name || user?.username || 'Kepala Desa/Pengguna'} (Chatbot)`,
+            sender: user?.name || user?.username || 'Kepala Desa/Pimpinan',
             date: new Date().toISOString(),
             status: 'pending_sekcam',
             priority: 'high',
@@ -42,7 +42,7 @@ export default function Chatbot() {
             instructions: userMessage,
             progress: 0
          });
-         botReply = `Baik, perintah Anda telah direkam berdasarkan ID Anda (${user?.username || 'Pengguna'}). Pesan telah dikirimkan ke Sekcam untuk segera dilakukan mapping dan verifikasi.`;
+         botReply = `Baik, perintah/kabar Anda telah direkam berdasarkan ID Anda (${user?.username || 'Pengguna'}). Pesan telah diteruskan ke Sekcam untuk segera direspons, dipetakan atau diverifikasi.`;
       } else if (lower.includes('surat')) {
          botReply = 'Saat ini ada beberapa surat aktif di sistem. Anda bisa langsung menugaskannya melalui form atau melalui chat ini.';
       } else if (lower.includes('disposisi') || lower.includes('tugas')) {
