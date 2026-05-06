@@ -26,15 +26,32 @@ export default function AdminUsers() {
       const { error } = await supabase.from('pegawai').insert([{
          nip: newUser.nip,
          nama: newUser.name,
-         role: newUser.role
+         role: newUser.role,
+         pass: '123456'
       }]);
       if (error) throw error;
-      addNotification(`Berhasil menambahkan pengguna manual: ${newUser.name} (${newUser.nip})`);
+      addNotification(`Berhasil menambahkan pengguna manual: ${newUser.name} (${newUser.nip}) dengan password default 123456`);
       setNewUser({ nip: '', name: '', role: 'staf_pelaksana' });
     } catch (err: any) {
       console.error("DB Error:", err);
       addNotification(`Gagal menambah pengguna: ${err.message}`);
     }
+  };
+
+  const handleDownloadTemplate = () => {
+    const ws = XLSX.utils.aoa_to_sheet([
+      ['NO', 'NAMA', 'NIP', 'JENIS ASN', 'PANGKAT / GOL', 'JABATAN', 'UNIT ORGANISASI', 'OPD', 'ALAMAT', 'NO HP', 'TUGAS POKOK', 'SEHARI-HARI', 'ROLE'],
+      [1, 'Budi Santoso', '198001012010011001', 'PNS', 'Penata Muda / III.a', 'Staf Pelaksana', 'Seksi Pemerintahan', 'Kecamatan XYZ', 'Jl. Merdeka No 1', '08123456789', 'Melaksanakan tugas administrasi', 'Menginput surat masuk', 'staf_pelaksana']
+    ]);
+    
+    // Auto size columns
+    ws['!cols'] = [
+      { wch: 5 }, { wch: 25 }, { wch: 20 }, { wch: 15 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 20 }, { wch: 30 }, { wch: 15 }, { wch: 30 }, { wch: 30 }, { wch: 15 }
+    ];
+
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Template_Pegawai");
+    XLSX.writeFile(wb, "Template_Import_Pegawai.xlsx");
   };
 
   const handleExcelImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -78,12 +95,14 @@ export default function AdminUsers() {
           const idxHp = headers.findIndex(h => h.includes('HP'));
           const idxTupoksi = headers.findIndex(h => h.includes('TUGAS POKOK'));
           const idxSehariHari = headers.findIndex(h => h.includes('SEHARI-HARI'));
+          const idxRole = headers.findIndex(h => h === 'ROLE');
 
           const rows = jsonData.slice(1).filter(r => r[idxNip] && r[idxNama]); // Must have NIP and NAMA
           
           const dbPayload = rows.map(r => ({
              nama: r[idxNama],
              nip: String(r[idxNip]).replace(/[^0-9]/g, ''), // clean nip to only digits
+             pass: '123456', // default password
              jenis_asn: idxJenisAsn >= 0 ? r[idxJenisAsn] : null,
              pangkat_gol: idxPangkat >= 0 ? r[idxPangkat] : null,
              jabatan: idxJabatan >= 0 ? r[idxJabatan] : null,
@@ -93,7 +112,7 @@ export default function AdminUsers() {
              no_hp: idxHp >= 0 ? r[idxHp] : null,
              tupoksi: idxTupoksi >= 0 ? r[idxTupoksi] : null,
              tugas_sehari_hari: idxSehariHari >= 0 ? r[idxSehariHari] : null,
-             role: 'staf_pelaksana' // default role
+             role: idxRole >= 0 && r[idxRole] ? r[idxRole].toLowerCase() : 'staf_pelaksana'
           }));
 
           const { createClient } = await import('@supabase/supabase-js');
@@ -103,6 +122,8 @@ export default function AdminUsers() {
           if (error) throw error;
 
           addNotification(`Import selesai: ${dbPayload.length} Pengguna baru telah ditambahkan ke Database.`);
+          
+          // Refresh context logic would go here if needed, or user can reload
         } catch (err: any) {
           console.error("Parse Error:", err);
           addNotification(`Gagal mengimpor data: ${err.message}`);
@@ -195,9 +216,9 @@ export default function AdminUsers() {
              </div>
              
              <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-4 mb-4">
-                <p className="text-xs text-emerald-800 leading-relaxed mb-3">Unduh template Excel lalu isi data pengguna secara massal. Sistem otomatis akan membuatkan kredensial (default password) sesuai format.</p>
+                <p className="text-xs text-emerald-800 leading-relaxed mb-3">Unduh template Excel lalu isi data pengguna secara massal. Sistem otomatis akan membuatkan kredensial (default password 123456) sesuai format.</p>
                 <div className="flex items-center gap-2">
-                   <button type="button" className="text-xs font-bold bg-white text-emerald-700 px-3 py-1.5 rounded border border-emerald-200 shadow-sm hover:bg-gray-50 transition-colors">
+                   <button type="button" onClick={handleDownloadTemplate} className="text-xs font-bold bg-white text-emerald-700 px-3 py-1.5 rounded border border-emerald-200 shadow-sm hover:bg-gray-50 transition-colors cursor-pointer">
                      Download Template (.xlsx)
                    </button>
                 </div>

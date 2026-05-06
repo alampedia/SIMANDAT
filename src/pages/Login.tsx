@@ -39,7 +39,9 @@ export default function Login() {
           </div>
         )}
         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">{config.appName}</h1>
-        <p className="opacity-90 font-medium text-gray-800">Sistem Monitoring Tata Kelola Disposisi</p>
+        <p className="opacity-90 font-medium text-gray-800 px-4 max-w-sm mx-auto leading-snug">
+          {config.appDescription}
+        </p>
       </div>
 
       <div className="max-w-md w-full bg-white rounded-3xl shadow-[0_20px_60px_rgb(0,0,0,0.15)] overflow-hidden relative z-10 flex flex-col">

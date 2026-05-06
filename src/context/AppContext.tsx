@@ -14,6 +14,7 @@ export interface User {
 
 export interface AppConfig {
   appName: string;
+  appDescription: string;
   appLogo: string;
   primaryColor: string;
   waApiKey: string;
@@ -61,7 +62,8 @@ interface AppContextType {
 
 
 const initialConfig: AppConfig = {
-  appName: 'SIMANDAT',
+  appName: 'SI-MANDAT',
+  appDescription: 'Sistem Monitoring Tata Kelola Disposisi dan Manajemen Delegasi Antar-Teritorial',
   appLogo: '',
   primaryColor: '#4f46e5', // Indigo 600
   waApiKey: '',
@@ -182,17 +184,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           .from('pegawai')
           .select('*')
           .eq('nip', username)
-          .eq('pass', pass)
-          .single();
+          .eq('pass', pass);
 
-        if (!error && data) {
+        if (!error && data && data.length > 0) {
+          const userData = data[0];
           setUser({
-            id: data.id,
-            username: data.nip,
-            name: data.nama,
-            role: data.role as UserRole,
-            title: data.jabatan || 'Pengguna',
-            tupoksi: data.tupoksi
+            id: userData.id,
+            username: userData.nip,
+            name: userData.nama,
+            role: userData.role as UserRole,
+            title: userData.jabatan || 'Pengguna',
+            tupoksi: userData.tupoksi
           });
           return true;
         } else {
@@ -223,6 +225,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         await supabase.from('app_settings').upsert({
            id: 'global',
            app_name: combinedConfig.appName,
+           app_description: combinedConfig.appDescription,
            app_logo: combinedConfig.appLogo || '',
            primary_color: combinedConfig.primaryColor,
            wa_api_key: combinedConfig.waApiKey,
@@ -257,6 +260,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
              const serverConfig = {
                ...currentConfig,
                appName: data.app_name || currentConfig.appName,
+               appDescription: data.app_description || currentConfig.appDescription,
                appLogo: data.app_logo || '',
                primaryColor: data.primary_color || currentConfig.primaryColor,
                waApiKey: data.wa_api_key || '',

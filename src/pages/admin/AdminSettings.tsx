@@ -8,6 +8,7 @@ export default function AdminSettings() {
   
   const [formData, setFormData] = useState({
     appName: config.appName,
+    appDescription: config.appDescription || '',
     appLogo: config.appLogo || '',
     primaryColor: config.primaryColor,
     waApiKey: config.waApiKey,
@@ -84,6 +85,18 @@ export default function AdminSettings() {
                   type="text"
                   name="appName"
                   value={formData.appName}
+                  onChange={handleChange}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:border-transparent transition-shadow"
+                  style={{ '--tw-ring-color': formData.primaryColor } as any}
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Deskripsi Aplikasi</label>
+                <input
+                  type="text"
+                  name="appDescription"
+                  value={formData.appDescription}
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:border-transparent transition-shadow"
                   style={{ '--tw-ring-color': formData.primaryColor } as any}
