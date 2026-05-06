@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // --- Types ---
-export type UserRole = 'admin' | 'camat' | 'sekcam' | 'kasi' | 'staf_agenda' | 'staf_pelaksana';
+export type UserRole = 'admin' | 'camat' | 'kapolsek' | 'danramil' | 'sekcam' | 'kasi' | 'staf_agenda' | 'staf_pelaksana';
 
 export interface User {
   id: string;
@@ -10,6 +10,7 @@ export interface User {
   role: UserRole;
   title: string;
   tupoksi?: string;
+  opd?: string;
 }
 
 export interface AppConfig {
@@ -39,6 +40,7 @@ export interface DisposisiTask {
   deadline?: string;
   progress?: number;
   history: { date: string; action: string; actor: string }[];
+  opd?: string;
 }
 
 interface AppContextType {
@@ -77,7 +79,21 @@ const initialTasks: DisposisiTask[] = [];
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const savedUser = localStorage.getItem('simandat_user');
+    if (savedUser) {
+      try {
+        const parsed = JSON.parse(savedUser);
+        if (parsed && parsed.role) {
+           parsed.role = parsed.role.toLowerCase();
+        }
+        return parsed;
+      } catch (e) {
+        return null;
+      }
+    }
+    return null;
+  });
   const [config, setConfigState] = useState<AppConfig>(initialConfig);
   const [tasks, setTasks] = useState<DisposisiTask[]>(initialTasks);
   const [notifications, setNotifications] = useState<{ id: string; message: string; read: boolean }[]>([]);
@@ -109,9 +125,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               id: p.id,
               username: p.nip,
               name: p.nama,
-              role: p.role as UserRole,
+              role: (p.role || '').toLowerCase() as UserRole,
               title: p.jabatan,
-              tupoksi: p.tupoksi
+              tupoksi: p.tupoksi,
+              opd: p.opd
             }));
             setDbUsers(mappedUsers);
           }
@@ -188,14 +205,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
         if (!error && data && data.length > 0) {
           const userData = data[0];
-          setUser({
+          const userObj = {
             id: userData.id,
             username: userData.nip,
             name: userData.nama,
-            role: userData.role as UserRole,
+            role: (userData.role || '').toLowerCase() as UserRole,
             title: userData.jabatan || 'Pengguna',
-            tupoksi: userData.tupoksi
-          });
+            tupoksi: userData.tupoksi,
+            opd: userData.opd
+          };
+          setUser(userObj);
+          localStorage.setItem('simandat_user', JSON.stringify(userObj));
           return true;
         } else {
            console.error('Login error from Supabase:', error ? error.message : 'User not found');
@@ -208,7 +228,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return false;
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem('simandat_user');
+  };
 
   // Update config and store it in localStorage and optionally Supabase
   const updateConfig = async (newConfig: Partial<AppConfig>) => {
@@ -303,6 +326,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             deadline: t.deadline,
             progress: t.progress,
             history: t.history || [],
+            opd: t.opd,
           }));
           setTasks(formattedTasks);
         }
@@ -339,7 +363,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           drive_url: task.driveUrl,
           assigned_to: task.assignedTo,
           instructions: task.instructions,
-          history: [historyUpdate]
+          history: [historyUpdate],
+          opd: task.opd || user?.opd
         }]);
 
         if (error) throw error;

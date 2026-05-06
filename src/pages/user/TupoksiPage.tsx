@@ -14,10 +14,22 @@ const TUPOKSI_DB: Record<string, string[]> = {
      'Melakukan pencadangan (backup) data sistem berkala setiap bulan.'
   ],
   'camat': [
-     'Memimpin dan membina pelaksanaan tugas penyelenggaraan pemerintahan.',
+     'Memimpin dan membina pelaksanaan tugas penyelenggaraan pemerintahan di wilayah kecamatan.',
      'Memberikan instruksi dan disposisi akhir pada surat masuk strategis.',
      'Memantau dan mengevaluasi laporan kinerja dari seluruh perangkat.',
      'Merumuskan kebijakan teknis pelaksanaan di tingkat kecamatan.'
+  ],
+  'kapolsek': [
+     'Memimpin dan membina pelaksanaan tugas kepolisian di wilayah sektor (Polsek).',
+     'Memberikan instruksi dan disposisi akhir pada surat masuk strategis terkait kamtibmas.',
+     'Memantau dan mengevaluasi kinerja anggota Polri di tingkat sektor.',
+     'Mengoordinasikan kegiatan keamanan dan ketertiban dengan unsur muspika lainnya.'
+  ],
+  'danramil': [
+     'Memimpin dan membina pelaksanaan tugas komando rayon militer (Koramil).',
+     'Memberikan instruksi dan disposisi akhir pada instansi militer tingkat rayon.',
+     'Memantau aktivitas pembinaan teritorial (Binter) dan kinerja Babinsa.',
+     'Mengoordinasikan stabilitas pertahanan dan kamtibmas bersinergi dengan unsur muspika.'
   ],
   'sekcam': [
      'Mengoordinasikan pelaksanaan tugas seluruh seksi di kecamatan.',

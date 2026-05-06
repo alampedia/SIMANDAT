@@ -9,7 +9,7 @@ export default function AdminUsers() {
   const [isImporting, setIsImporting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   
-  const [newUser, setNewUser] = useState({ nip: '', name: '', role: 'staf_pelaksana' });
+  const [newUser, setNewUser] = useState({ nip: '', name: '', role: 'staf_pelaksana', opd: 'Kecamatan' });
 
   const handleAddUserManual = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,11 +27,12 @@ export default function AdminUsers() {
          nip: newUser.nip,
          nama: newUser.name,
          role: newUser.role,
+         opd: newUser.opd,
          pass: '123456'
       }]);
       if (error) throw error;
-      addNotification(`Berhasil menambahkan pengguna manual: ${newUser.name} (${newUser.nip}) dengan password default 123456`);
-      setNewUser({ nip: '', name: '', role: 'staf_pelaksana' });
+      addNotification(`Berhasil menambahkan pengguna manual: ${newUser.name} (${newUser.nip}) di wilayah ${newUser.opd} dengan password default 123456`);
+      setNewUser({ nip: '', name: '', role: 'staf_pelaksana', opd: 'Kecamatan' });
     } catch (err: any) {
       console.error("DB Error:", err);
       addNotification(`Gagal menambah pengguna: ${err.message}`);
@@ -195,14 +196,27 @@ export default function AdminUsers() {
                   >
                     <option value="staf_pelaksana">Staf Pelaksana</option>
                     <option value="staf_agenda">Staf Agenda</option>
-                    <option value="kasi">Kasi / Kasubag</option>
-                    <option value="kabag">Kepala Bagian</option>
-                    <option value="sekcam">Sekretaris Kecamatan</option>
+                    <option value="kasi">Kasi / Kasubag / Kanit</option>
+                    <option value="sekcam">Sekretaris / Wakapolsek / Batuud</option>
                     <option value="camat">Camat</option>
+                    <option value="kapolsek">Kapolsek</option>
+                    <option value="danramil">Danramil</option>
                     <option value="admin">Administrator</option>
                   </select>
                </div>
-               <button type="submit" className="w-full text-white font-medium py-2 rounded-lg text-sm transition-colors shadow-sm" style={{ backgroundColor: config.primaryColor }}>
+               <div>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">OPD / Institusi</label>
+                  <input
+                    type="text"
+                    value={newUser.opd}
+                    onChange={(e) => setNewUser({...newUser, opd: e.target.value})}
+                    placeholder="Contoh: Kecamatan / Polsek / Koramil"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:border-transparent"
+                    style={{ '--tw-ring-color': config.primaryColor } as any}
+                    required
+                  />
+               </div>
+               <button type="submit" className="w-full text-white font-medium py-2 rounded-lg text-sm transition-colors shadow-sm mt-4" style={{ backgroundColor: config.primaryColor }}>
                  Tambahkan Pengguna
                </button>
              </form>

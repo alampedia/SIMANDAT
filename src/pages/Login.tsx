@@ -5,12 +5,18 @@ import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'motion/react';
 
 export default function Login() {
-  const { login, config } = useAppContext();
+  const { login, config, user } = useAppContext();
   const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+
+  React.useEffect(() => {
+    if (user) {
+      navigate('/', { replace: true });
+    }
+  }, [user, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();

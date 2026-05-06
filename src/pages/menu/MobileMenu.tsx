@@ -45,14 +45,14 @@ export default function MobileMenu() {
        label: 'Disposisi', 
        icon: SendIcon, 
        path: '/disposisi', 
-       roles: ['admin', 'sekcam', 'camat'] 
+       roles: ['admin', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
        id: 'verifikasi', 
        label: 'Verifikasi', 
        icon: FileCheck2, 
        path: '/telaah', 
-       roles: ['admin', 'sekcam', 'camat'] 
+       roles: ['admin', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
        id: 'disposisi-masuk', 
@@ -66,7 +66,7 @@ export default function MobileMenu() {
        label: 'Tracking Kinerja', 
        icon: Target, 
        path: '/tracking', 
-       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat'] 
+       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     {
        id: 'laporan-kinerja',
@@ -80,49 +80,49 @@ export default function MobileMenu() {
        label: 'Status Pekerjaan Staf', 
        icon: Users, 
        path: '/pekerjaan-staf', 
-       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat'] 
+       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
        id: 'progress', 
        label: 'Progres', 
        icon: PieChart, 
        path: '/progress',
-       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat']
+       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil']
     },
     { 
        id: 'monitoring', 
        label: 'Monitoring & Laporan', 
        icon: BarChart3, 
        path: '/monitoring', 
-       roles: ['admin', 'kasubag', 'kabag', 'sekcam', 'camat'] 
+       roles: ['admin', 'kasubag', 'kabag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     {
        id: 'cetak-laporan',
        label: 'Cetak Laporan',
        icon: FileText,
        path: '/cetak-laporan',
-       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat']
+       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil']
     },
     { 
        id: 'tupoksi', 
        label: 'Tupoksi', 
        icon: Briefcase, 
        path: '/tupoksi', 
-       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat'] 
+       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
        id: 'jdih', 
        label: 'JDIH', 
        icon: BookOpen, 
        path: '/jdih', 
-       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat'] 
+       roles: ['admin', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil', 'staf_pelaksana', 'staf_agenda'] 
     },
     { 
        id: 'sop', 
        label: 'SOP', 
        icon: FileText, 
        path: '/sop', 
-       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat'] 
+       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
        id: 'pengguna', 
@@ -140,7 +140,10 @@ export default function MobileMenu() {
     },
   ];
 
-  const accessibleMenus = menuConfig.filter(menu => menu.roles.includes(user?.role as string));
+  const accessibleMenus = menuConfig.filter(menu => {
+     const userRole = (user?.role || 'staf_pelaksana').toLowerCase().trim();
+     return menu.roles.includes(userRole);
+  });
 
   // Colorful icon palette mapping based on reference image colors (Cyan, Yellow, Orange, Pink) + standard vibrant UI
   const menuColors = [
@@ -159,8 +162,14 @@ export default function MobileMenu() {
     <div className="p-4 lg:p-6 w-full overflow-hidden box-border">
       <header className="mb-6 ml-2">
         <h1 className="text-2xl font-bold text-gray-900">Menu Utama</h1>
-        <p className="text-gray-500 text-sm">Layanan sistem {config.appName}.</p>
+        <p className="text-gray-500 text-sm">Layanan sistem {config.appName}. {user?.role ? `(Role: ${user.role})` : ''}</p>
       </header>
+
+      {accessibleMenus.length === 0 && (
+         <div className="p-4 bg-red-50 text-red-600 rounded-xl">
+           Tidak ada menu yang tersedia untuk role Anda ({user?.role || 'Tidak ada role'}).
+         </div>
+      )}
 
       <div className="grid grid-cols-3 gap-3 md:gap-4 auto-rows-fr">
         {accessibleMenus.map((menu, i) => {

@@ -9,11 +9,16 @@ export default function PageDisposisi() {
   
   // Ambil surat yang perlu disposisi sesuai role
   const incomingLetters = tasks.filter(t => {
+    // Filter task by user's OPD if applicable
+    if (user?.opd && t.opd && t.opd !== user.opd) return false;
+
     if (user?.role === 'sekcam') return t.status === 'pending_sekcam';
-    if (user?.role === 'camat') return t.status === 'pending_camat';
+    if (['camat', 'kapolsek', 'danramil'].includes(user?.role || '')) return t.status === 'pending_camat';
     return false;
   });
   
+  const isPimpinan = ['camat', 'kapolsek', 'danramil'].includes(user?.role || '');
+
   const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
   
   const [disposisiForm, setDisposisiForm] = useState({
@@ -40,12 +45,12 @@ export default function PageDisposisi() {
     const combinedNotes = `(Arahan: ${disposisiForm.instruksi}) ${disposisiForm.catatanKhusus} ${disposisiForm.linkDrive ? `\n[Link: ${disposisiForm.linkDrive}]` : ''}`.trim();
 
     if (user?.role === 'sekcam') {
-        // Sekcam mem-forward ke Camat untuk divalidasi
+        // Sekcam mem-forward ke Pimpinan untuk divalidasi
         // target sudah dipilih dari form
         updateTaskStatus(selectedTask.id, 'pending_camat', combinedNotes, disposisiForm.tujuan);
-        addNotification(`Surat ${selectedTask.id} berhasil dimapping dan diteruskan ke Camat untuk persetujuan.`);
-    } else if (user?.role === 'camat') {
-        // Camat memvalidasi dan approve disposisi dari Sekcam, atau mengirim ke Target
+        addNotification(`Surat ${selectedTask.id} berhasil dimapping dan diteruskan ke pimpinan untuk persetujuan.`);
+    } else if (isPimpinan) {
+        // Pimpinan memvalidasi dan approve disposisi dari Sekcam, atau mengirim ke Target
         const finalTujuan = disposisiForm.tujuan || selectedTask.assignedTo;
         if (!finalTujuan) {
            addNotification('Pilih Pejabat Target terlebih dahulu!', 'error');
@@ -75,7 +80,7 @@ export default function PageDisposisi() {
        {!selectedTask ? (
          <div className="space-y-4">
             <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center gap-2">
-               <Clock size={16} className="text-indigo-600" /> Menunggu {user?.role === 'camat' ? 'Persetujuan' : 'Arahan'} ({incomingLetters.length})
+               <Clock size={16} className="text-indigo-600" /> Menunggu {isPimpinan ? 'Persetujuan' : 'Arahan'} ({incomingLetters.length})
             </h3>
             
             {incomingLetters.length === 0 ? (
@@ -90,8 +95,8 @@ export default function PageDisposisi() {
                       key={task.id} 
                       onClick={() => {
                         setSelectedTask(task);
-                        // Populate form with existing mapping if user is camat
-                        if (user?.role === 'camat' && task.assignedTo) {
+                        // Populate form with existing mapping if user is pimpinan
+                        if (isPimpinan && task.assignedTo) {
                            setDisposisiForm(prev => ({...prev, tujuan: task.assignedTo || ''}));
                         }
                       }}
@@ -103,14 +108,14 @@ export default function PageDisposisi() {
                        
                        <div className="flex items-center gap-2">
                           <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] tracking-wider uppercase border border-amber-200">
-                            {user?.role === 'camat' ? 'BUTUH VALIDASI' : 'BUTUH ARAHAN'}
+                            {isPimpinan ? 'BUTUH VALIDASI' : 'BUTUH ARAHAN'}
                           </span>
                           <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
                        </div>
                        
                        <h4 className="font-bold text-gray-900 leading-snug">{task.title}</h4>
                        <p className="text-sm text-gray-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
-                       {user?.role === 'camat' && task.assignedTo && (
+                       {isPimpinan && task.assignedTo && (
                           <div className="mt-2 text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
                              <span className="font-bold text-gray-600">Usulan Target:</span> {task.assignedTo}
                           </div>
@@ -144,7 +149,7 @@ export default function PageDisposisi() {
             <form onSubmit={handleDisposisi} className="space-y-5">
                <h3 className="font-bold text-sm uppercase tracking-wide text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
                  <UserCheck size={16} className="text-indigo-600" /> 
-                 {user?.role === 'camat' ? 'Validasi / Approval Disposisi' : 'Formulir Mapping Disposisi'}
+                 {isPimpinan ? 'Validasi / Approval Disposisi' : 'Formulir Mapping Disposisi'}
                </h3>
                
                <div>
@@ -158,7 +163,7 @@ export default function PageDisposisi() {
                       style={{ '--tw-ring-color': config.primaryColor } as any}
                    >
                       <option value="" disabled>-- Pilih Pejabat / Staf Tujuan --</option>
-                      {usersList.filter(u => u.role !== 'admin' && u.role !== 'camat').map(u => (
+                      {usersList.filter(u => u.role !== 'admin' && !['camat', 'kapolsek', 'danramil'].includes(u.role) && (!user?.opd || u.opd === user?.opd)).map(u => (
                          <option key={u.id} value={u.name}>
                             {u.name} ({u.title})
                          </option>
@@ -220,10 +225,10 @@ export default function PageDisposisi() {
                      className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95"
                      style={{ backgroundColor: config.primaryColor }}
                   >
-                     {user?.role === 'camat' ? (
+                     {isPimpinan ? (
                         <><FileCheck size={18} /> Setujui & Teruskan ke Target</>
                      ) : (
-                        <><SendIcon size={16} /> Mapping & Ajukan ke Camat</>
+                        <><SendIcon size={16} /> Mapping & Ajukan ke Pimpinan</>
                      )}
                   </button>
                </div>

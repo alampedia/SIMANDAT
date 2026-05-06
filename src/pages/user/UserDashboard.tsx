@@ -66,7 +66,8 @@ export default function UserDashboard() {
   }, [user, config.supabaseUrl, config.supabaseKey]);
 
   const role = user?.role || 'staf_pelaksana';
-  const isPimpinan = role === 'camat' || role === 'sekcam' || role === 'admin';
+  const isPimpinanPuncak = ['camat', 'kapolsek', 'danramil'].includes(role);
+  const isPimpinan = isPimpinanPuncak || role === 'sekcam' || role === 'admin';
   const isManager = role === 'kasi';
   const isStaf = role === 'staf_pelaksana' || role === 'staf_agenda';
   
@@ -135,7 +136,7 @@ export default function UserDashboard() {
   return (
     <div className="space-y-6 lg:px-4">
       
-      {role !== 'camat' && (
+      {!isPimpinanPuncak && (
         <div className={cn("grid gap-4 w-full grid-cols-1")}>
           
           {/* 2B. Kinerja Bulanan & Aktivitas Terakhir (SEMUA PENGGUNA) */}
@@ -178,7 +179,7 @@ export default function UserDashboard() {
       {/* DASHBOARD PIMPINAN (Camat) - Surat perlu di approve */}
       {isPimpinan && (
         <div className="space-y-6">
-          {role === 'camat' && (
+          {isPimpinanPuncak && (
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <div 
                 className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors"
@@ -240,7 +241,7 @@ export default function UserDashboard() {
               
               {isDelegasiOpen && (
                 <div className="p-6 pt-0">
-                  <p className="text-sm text-gray-600 mb-4 font-medium">Petakan naskah dinas masuk kepada target pejabat/staf bersangkutan dan ajukan rincian ke Camat.</p>
+                  <p className="text-sm text-gray-600 mb-4 font-medium">Petakan naskah dinas masuk kepada target pejabat/staf bersangkutan dan ajukan rincian ke pimpinan.</p>
                   <div className="space-y-3">
                      {incomingSekcamTasks.length === 0 ? (
                         <div className="p-4 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
@@ -274,7 +275,7 @@ export default function UserDashboard() {
       )}
 
       {/* DASHBOARD KOTAK TUGAS SAYA */}
-      {(role !== 'admin' && role !== 'camat') && (
+      {(!isPimpinanPuncak && role !== 'admin') && (
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
           <div 
             className="p-5 lg:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors"

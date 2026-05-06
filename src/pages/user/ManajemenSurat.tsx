@@ -10,6 +10,8 @@ export default function ManajemenSurat() {
   const { config, user, tasks, addTask, updateTaskStatus, addNotification, usersList } = useAppContext();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'masuk' | 'keluar' | 'arsip'>('masuk');
+  
+  const isPimpinanPuncak = ['camat', 'kapolsek', 'danramil'].includes(user?.role || '');
 
   const filteredDocs = tasks.filter(doc => activeTab === 'masuk' ? true : false); // simplifies logic to show all in masuk for now
 
@@ -57,7 +59,7 @@ export default function ManajemenSurat() {
     if (user?.role === 'sekcam') {
         newStatus = 'pending_camat';
         updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
-    } else if (user?.role === 'camat') {
+    } else if (isPimpinanPuncak) {
         newStatus = 'pending_target';
         updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
     } else {
@@ -156,7 +158,7 @@ export default function ManajemenSurat() {
                      )}
                      
                      <div className="flex w-full sm:w-auto gap-2">
-                        {((doc.status === 'pending_sekcam' && user?.role === 'sekcam') || (doc.status === 'pending_camat' && user?.role === 'camat')) && (
+                        {((doc.status === 'pending_sekcam' && user?.role === 'sekcam') || (doc.status === 'pending_camat' && isPimpinanPuncak)) && (
                           <button 
                             onClick={() => setDisposisiDoc(doc)}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md hover:bg-indigo-700 active:scale-95 transition-all"
@@ -352,7 +354,7 @@ export default function ManajemenSurat() {
                       className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
                     >
                       <option value="" disabled>-- Pilih Pejabat / Staf --</option>
-                      {usersList.filter(u => u.role !== 'admin' && u.role !== 'camat').map(u => (
+                      {usersList.filter(u => u.role !== 'admin' && !['camat', 'kapolsek', 'danramil'].includes(u.role) && (!user?.opd || u.opd === user?.opd)).map(u => (
                         <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
                       ))}
                     </select>
