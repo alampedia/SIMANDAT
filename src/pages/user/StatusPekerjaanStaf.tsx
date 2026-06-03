@@ -4,20 +4,16 @@ import { Users, Search, Filter } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function StatusPekerjaanStaf() {
-  const { config } = useAppContext();
+  const { tasks, user, usersList } = useAppContext();
 
-  // Mock data for staff tasks
-  const staffTasks = [
-    { id: 'T-003', title: 'Verifikasi Berkas KTP', assignedTo: 'Budi Santoso', status: 'completed' },
-    { id: 'T-004', title: 'Survey Kelapangan RT 05', assignedTo: 'Andi M.', status: 'in_progress' },
-    { id: 'T-005', title: 'Rekapitulasi Absensi', assignedTo: 'Siti Rahma', status: 'overdue' }
-  ];
+  // Find users managed by this person, or in the same OPD ideally. For now, we'll just show all active tasks assigned to Staf and Kasi if Admin/Camat
+  const staffTasks = tasks.filter(t => t.assignedTo && t.assignedTo !== user?.name && t.assignedTo !== user?.username);
 
   return (
     <div className="space-y-6 lg:px-4 pb-12">
       <header className="mb-6 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Status Pekerjaan Staf</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Status Pekerjaan Karyawan</h1>
           <p className="text-gray-500 text-sm mt-1">Pantau progres pengerjaan tugas oleh bawahan Anda.</p>
         </div>
       </header>
@@ -41,24 +37,36 @@ export default function StatusPekerjaanStaf() {
           {staffTasks.length === 0 ? (
             <div className="py-12 text-center text-gray-500">
                <Users size={48} className="mx-auto text-gray-300 mb-3" />
-               <p>Staf tidak memiliki tugas aktif.</p>
+               <p>Belum ada disposisi/tugas yang didelegasikan ke bawahan.</p>
             </div>
           ) : (
             staffTasks.map(t => (
               <div key={t.id} className="p-4 border border-gray-100 rounded-2xl flex flex-col sm:flex-row justify-between sm:items-center hover:bg-gray-50 transition-colors gap-3">
-                <div>
-                   <span className="font-bold text-gray-900 block text-base mb-1">{t.title}</span>
+                <div className="flex-1">
+                   <div className="flex items-center gap-2 mb-1">
+                     <span className="font-bold text-gray-900 block text-base leading-tight">{t.title}</span>
+                     {t.progress !== undefined && t.status !== 'completed' && (
+                        <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2.5 py-0.5 rounded-full">{t.progress}% Progress</span>
+                     )}
+                   </div>
+                   
                    <span className="text-sm text-gray-500 flex items-center gap-1">
-                     Staf Pelaksana: <span className="font-semibold text-gray-700">{t.assignedTo || '-'}</span>
+                     Pelaksana: <span className="font-semibold text-gray-700">{t.assignedTo || '-'}</span>
                    </span>
+                   {t.history && t.history.length > 0 && (
+                      <p className="text-xs text-gray-400 mt-2 line-clamp-1 italic">
+                         Catatan terbaru: {t.history[t.history.length - 1].action}
+                      </p>
+                   )}
                 </div>
-                <div className="flex justify-end">
+                <div className="flex items-end justify-end mt-2 sm:mt-0">
                   <span className={cn(
                      "text-[10px] font-bold px-3 py-1.5 rounded-xl tracking-wide uppercase",
                      t.status === 'completed' ? "bg-green-100 text-green-700" : 
-                     t.status === 'overdue' ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"
+                     t.status === 'overdue' ? "bg-red-100 text-red-700" : 
+                     t.status === 'pending_target' ? "bg-amber-100 text-amber-700" : "bg-blue-100 text-blue-700"
                   )}>
-                    {t.status === 'completed' ? 'Selesai' : t.status === 'overdue' ? 'Terlambat' : 'Diproses'}
+                    {t.status === 'completed' ? 'Selesai' : t.status === 'overdue' ? 'Terlambat' : t.status === 'pending_target' ? 'Menunggu Konfirmasi' : 'Diproses'}
                   </span>
                 </div>
               </div>

@@ -10,7 +10,7 @@ export const BottomNav = ({ desktopMode = false }: { desktopMode?: boolean }) =>
   const location = useLocation();
 
   const navItems = [
-    { id: 'chatbot', label: 'Chatbot', icon: MessageSquare, path: '/chatbot' },
+    { id: 'chatbot', label: 'Grup WA', icon: MessageSquare, path: '/chatbot' },
     { id: 'dashboard', label: 'Dashboard', icon: LayoutGrid, path: '/' },
     { id: 'menu', label: 'Menu', icon: Menu, path: '/menu' },
     { id: 'profil', label: 'Profil', icon: User, path: '/profil' },

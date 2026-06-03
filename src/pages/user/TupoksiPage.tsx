@@ -65,9 +65,17 @@ const TUPOKSI_DB: Record<string, string[]> = {
 export default function TupoksiPage() {
   const { user, config } = useAppContext();
 
+  let effectiveRole = user?.role || 'staf_pelaksana';
+  if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(effectiveRole)) {
+    effectiveRole = 'staf_pelaksana';
+  }
+  if (['danramil', 'kapolsek'].includes(effectiveRole)) {
+    effectiveRole = 'camat';
+  }
+
   const activeTupoksi = user?.tupoksi 
     ? user.tupoksi.split('\n').filter(Boolean)
-    : TUPOKSI_DB[user?.role || ''] || [];
+    : TUPOKSI_DB[effectiveRole] || [];
 
   return (
     <div className="space-y-6 lg:px-4 pb-10">
@@ -100,18 +108,18 @@ export default function TupoksiPage() {
          <div>
             <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-4">
                <ShieldCheck size={18} className="text-green-600" />
-               Daftar Uraian Tugas
+               Daftar Uraian Tugas Pokok
             </h4>
 
             {activeTupoksi.length === 0 ? (
-               <div className="text-sm italic text-gray-500 bg-gray-50 p-4 rounded-xl text-center border border-dashed">
-                  Belum ada profil tupoksi yang diatur untuk NIP ini.
+               <div className="text-sm italic text-gray-500 bg-gray-50 p-4 rounded-xl text-center border border-dashed mb-8">
+                  Belum ada profil tupoksi utama yang diatur untuk NIP ini.
                </div>
             ) : (
-               <div className="space-y-3">
+               <div className="space-y-3 mb-8">
                   {activeTupoksi.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group">
-                       <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                    <div key={index} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
+                       <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
                           {index + 1}
                        </div>
                        <p className="text-sm text-gray-700 leading-relaxed font-medium">
@@ -119,6 +127,25 @@ export default function TupoksiPage() {
                        </p>
                     </div>
                   ))}
+               </div>
+            )}
+            
+            {user?.tugasSehariHari && (
+               <div className="mt-8 pt-8 border-t border-gray-100">
+                  <h4 className="font-bold text-gray-900 flex items-center gap-2 mb-4">
+                     <ClipboardList size={18} className="text-blue-600" />
+                     Daftar Tugas Sehari-Hari (Informatif)
+                  </h4>
+                  <div className="space-y-3">
+                     {user.tugasSehariHari.split('\n').filter(Boolean).map((item, index) => (
+                        <div key={index} className="flex items-start gap-3 p-3 rounded-xl bg-blue-50/30 hover:bg-blue-50/80 transition-colors border border-blue-100/50">
+                           <div className="w-2 h-2 rounded-full bg-blue-400 shrink-0 mt-1.5" />
+                           <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                              {item}
+                           </p>
+                        </div>
+                     ))}
+                  </div>
                </div>
             )}
          </div>

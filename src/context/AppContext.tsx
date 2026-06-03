@@ -1,15 +1,17 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 // --- Types ---
-export type UserRole = 'admin' | 'camat' | 'kapolsek' | 'danramil' | 'sekcam' | 'kasi' | 'staf_agenda' | 'staf_pelaksana';
+export type UserRole = 'admin' | 'camat' | 'kapolsek' | 'danramil' | 'sekcam' | 'kasi' | 'kabag' | 'kasubag' | 'staf_agenda' | 'staf_pelaksana' | 'pelaksana' | 'sertu' | 'serma' | 'praka' | 'serda' | 'serka' | 'aipda' | 'aiptu' | 'bripka' | 'briptu' | string;
 
 export interface User {
   id: string;
   username: string; // Used as NIP
   name: string;
+  phone?: string;
   role: UserRole;
   title: string;
   tupoksi?: string;
+  tugasSehariHari?: string;
   opd?: string;
 }
 
@@ -19,6 +21,8 @@ export interface AppConfig {
   appLogo: string;
   primaryColor: string;
   waApiKey: string;
+  waGroupId: string;
+  waWebhookUrl: string;
   geminiApiKey: string;
   supabaseUrl: string;
   supabaseKey: string;
@@ -68,7 +72,9 @@ const initialConfig: AppConfig = {
   appDescription: 'Sistem Monitoring Tata Kelola Disposisi dan Manajemen Delegasi Antar-Teritorial',
   appLogo: '',
   primaryColor: '#4f46e5', // Indigo 600
-  waApiKey: '',
+  waApiKey: '1cJnf2tcHCFcfi8wPHDt',
+  waGroupId: '120363426010181190@g.us',
+  waWebhookUrl: 'https://simandat.netlify.app/',
   geminiApiKey: '',
   supabaseUrl: 'https://ftqwgnlpgiuxdpckxhsk.supabase.co',
   supabaseKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0cXdnbmxwZ2l1eGRwY2t4aHNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcyMjcyNjUsImV4cCI6MjA5MjgwMzI2NX0.kcQe5VYlzqaXycr2VYMwWtJgNgNuiEqXHiTayS-vTag',
@@ -125,9 +131,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               id: p.id,
               username: p.nip,
               name: p.nama,
+              phone: p.no_hp,
               role: (p.role || '').toLowerCase() as UserRole,
               title: p.jabatan,
               tupoksi: p.tupoksi,
+              tugasSehariHari: p.tugas_sehari_hari,
               opd: p.opd
             }));
             setDbUsers(mappedUsers);
@@ -209,9 +217,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             id: userData.id,
             username: userData.nip,
             name: userData.nama,
+            phone: userData.no_hp,
             role: (userData.role || '').toLowerCase() as UserRole,
             title: userData.jabatan || 'Pengguna',
             tupoksi: userData.tupoksi,
+            tugasSehariHari: userData.tugas_sehari_hari,
             opd: userData.opd
           };
           setUser(userObj);
@@ -252,6 +262,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
            app_logo: combinedConfig.appLogo || '',
            primary_color: combinedConfig.primaryColor,
            wa_api_key: combinedConfig.waApiKey,
+           wa_group_id: combinedConfig.waGroupId,
+           wa_webhook_url: combinedConfig.waWebhookUrl,
            gemini_api_key: combinedConfig.geminiApiKey,
            updated_at: new Date().toISOString()
         });
@@ -287,6 +299,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
                appLogo: data.app_logo || '',
                primaryColor: data.primary_color || currentConfig.primaryColor,
                waApiKey: data.wa_api_key || '',
+               waGroupId: data.wa_group_id || '',
+               waWebhookUrl: data.wa_webhook_url || currentConfig.waWebhookUrl || '',
                geminiApiKey: data.gemini_api_key || '',
              };
              setConfigState(serverConfig);
@@ -389,6 +403,30 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     // Find current task state for DB update
     const currentTask = tasks.find(t => t.id === taskId);
     if (!currentTask) return;
+
+    // ----- WHATSAPP FONNTE LOGIC -----
+    if (newStatus === 'pending_target' && config.waApiKey) {
+      const targetUserAlias = assignedTo || currentTask.assignedTo;
+      if (targetUserAlias) {
+        const targetUser = dbUsers.find(u => u.name === targetUserAlias || u.username === targetUserAlias);
+        if (targetUser && targetUser.phone) {
+           const waMsg = `*SIMANDAT - TUGAS BARU*\n\nHalo *${targetUser.name}*,\nAnda mendapat disposisi baru dari pimpinan.\n\n*Dokumen:* ${currentTask.title}\n*Instruksi Pimpinan:* ${note || currentTask.instructions || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk menindaklanjuti atau update progres. Terima kasih.`;
+           import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, targetUser.phone!, waMsg));
+        }
+      }
+    }
+    
+    if (newStatus === 'completed' && config.waApiKey && user) {
+       // Send feedback to Atasan (e.g. Camat, Kapolsek or Sekcam) in the same OPD
+       const atasans = dbUsers.filter(u => ['camat', 'kapolsek', 'danramil', 'sekcam'].includes(u.role) && (!u.opd || u.opd === user.opd));
+       for (const atasan of atasans) {
+          if (atasan.phone) {
+             const waMsg = `*SIMANDAT - LAPORAN SELESAI*\n\nHalo *${atasan.name}*,\n\nTugas *${currentTask.title}* telah diselesaikan oleh *${user.name}*.\n\n*Uraian/Catatan Pelaksana:* ${note || 'Tugas telah dilaksanakan.'}\n\nSilakan cek aplikasi SIMANDAT untuk verifikasi jika diperlukan.`;
+             import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, atasan.phone!, waMsg));
+          }
+       }
+    }
+    // ---------------------------------
 
     // Optimistically update
     setTasks(prev => prev.map(t => {

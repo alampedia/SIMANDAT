@@ -20,6 +20,7 @@ import GenericFeaturePage from './pages/user/GenericFeaturePage';
 import ManajemenSurat from './pages/user/ManajemenSurat';
 import DisposisiMasuk from './pages/user/DisposisiMasuk';
 import StatusPekerjaanStaf from './pages/user/StatusPekerjaanStaf';
+import CetakLaporan from './pages/user/CetakLaporan';
 
 // Private Route logic
 const PrivateRoute = ({ allowedRoles, excludeRoles }: { allowedRoles?: string[], excludeRoles?: string[] }) => {
@@ -93,7 +94,7 @@ function AppRoutes() {
              <Route path="/pekerjaan-staf" element={<StatusPekerjaanStaf />} />
              <Route path="/jdih" element={<GenericFeaturePage title="JDIH Hukum" description="Jaringan Dokumentasi dan Informasi Hukum." isList={true} />} />
              <Route path="/sop" element={<GenericFeaturePage title="SOP Pelayanan" description="Standar Operasional Prosedur Pelayanan Organisasi." isList={true} />} />
-             <Route path="/cetak-laporan" element={<GenericFeaturePage title="Cetak Laporan" description="Fitur untuk mencetak laporan kerja." />} />
+             <Route path="/cetak-laporan" element={<CetakLaporan />} />
              <Route path="/progress" element={<AdminLaporan />} />
              <Route path="/tracking" element={<TrackingKinerja />} />
              <Route path="/tupoksi" element={<TupoksiPage />} />

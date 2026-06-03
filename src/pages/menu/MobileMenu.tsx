@@ -141,7 +141,13 @@ export default function MobileMenu() {
   ];
 
   const accessibleMenus = menuConfig.filter(menu => {
-     const userRole = (user?.role || 'staf_pelaksana').toLowerCase().trim();
+     let userRole = (user?.role || 'staf_pelaksana').toLowerCase().trim();
+     if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(userRole)) {
+       userRole = 'staf_pelaksana';
+     }
+     if (['danramil', 'kapolsek'].includes(userRole)) {
+       userRole = 'camat';
+     }
      return menu.roles.includes(userRole);
   });
 

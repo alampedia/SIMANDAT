@@ -11,7 +11,9 @@ export default function AdminSettings() {
     appDescription: config.appDescription || '',
     appLogo: config.appLogo || '',
     primaryColor: config.primaryColor,
-    waApiKey: config.waApiKey,
+    waApiKey: config.waApiKey || '',
+    waGroupId: config.waGroupId || '',
+    waWebhookUrl: config.waWebhookUrl || '',
     geminiApiKey: config.geminiApiKey,
     supabaseUrl: config.supabaseUrl || '',
     supabaseKey: config.supabaseKey || '',
@@ -192,17 +194,52 @@ export default function AdminSettings() {
             <div>
               <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
                 <Smartphone size={16} className="text-green-600 shrink-0" />
-                Konfigurasi API WhatsApp (Notifikasi)
+                Token API Whatsapp Fonnte (Notifikasi & Disposisi)
               </label>
               <input
                 type="password"
                 name="waApiKey"
                 value={formData.waApiKey}
                 onChange={handleChange}
-                placeholder="sk_wa_xxxxxxxxxxxx"
+                placeholder="Masukkan Token Fonnte..."
                 className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:border-transparent transition-shadow"
                 style={{ '--tw-ring-color': formData.primaryColor } as any}
               />
+              <p className="text-xs text-gray-500 mt-2">Gunakan token dari <a href="https://md.fonnte.com/" target="_blank" rel="noopener noreferrer" className="text-blue-500 underline font-semibold">Fonnte</a> untuk mengirim pesan WhatsApp otomatis.</p>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <Users size={16} className="text-green-600 shrink-0" />
+                ID Target Grup / WA Utama (Fonnte)
+              </label>
+              <input
+                type="text"
+                name="waGroupId"
+                value={formData.waGroupId}
+                onChange={handleChange}
+                placeholder="Contoh: 120363xxxxxx@g.us atau 0812xxxxxx"
+                className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:border-transparent transition-shadow"
+                style={{ '--tw-ring-color': formData.primaryColor } as any}
+              />
+              <p className="text-xs text-gray-500 mt-2">ID Grup WhatsApp untuk fitur Chatbot/Pesan Grup.</p>
+            </div>
+
+            <div>
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+                <Smartphone size={16} className="text-green-600 shrink-0" />
+                URL Webhook Fonnte
+              </label>
+              <input
+                type="url"
+                name="waWebhookUrl"
+                value={formData.waWebhookUrl}
+                onChange={handleChange}
+                placeholder="https://simandat.netlify.app"
+                className="w-full max-w-md border border-gray-300 rounded-lg px-4 py-2 outline-none focus:ring-2 focus:border-transparent transition-shadow"
+                style={{ '--tw-ring-color': formData.primaryColor } as any}
+              />
+              <p className="text-xs text-blue-600 mt-2 font-medium">INFO PENTING: Untuk menerima balasan dari Fonnte, pastikan Anda juga menyalin URL di atas ke kolom "Webhook" di Dashboard Fonnte.</p>
             </div>
 
             <div className="pt-4 border-t border-gray-100">

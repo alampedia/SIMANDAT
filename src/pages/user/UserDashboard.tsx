@@ -24,6 +24,20 @@ export default function UserDashboard() {
   const [isDelegasiOpen, setIsDelegasiOpen] = useState(incomingSekcamTasks.length > 0);
   const [isPersetujuanOpen, setIsPersetujuanOpen] = useState(incomingCamatTasks.length > 0);
 
+  // States for Task Feedback Completion Target
+  const [feedbackTaskId, setFeedbackTaskId] = useState<string | null>(null);
+  const [feedbackText, setFeedbackText] = useState('');
+
+  const submitCompletionFeedback = () => {
+     if (feedbackTaskId) {
+        updateTaskStatus(feedbackTaskId, 'completed', feedbackText ? `Tugas diselesaikan. Catatan/Feedback Pelaksana: ${feedbackText}` : 'Tugas diselesaikan oleh Target', undefined, 100);
+        setFeedbackTaskId(null);
+        setFeedbackText('');
+     }
+  };
+
+  const [recentActivities, setRecentActivities] = useState<any[]>([]);
+
   useEffect(() => {
     const fetchPerformance = async () => {
       if (!user?.username || !config.supabaseUrl || !config.supabaseKey) return;
@@ -46,17 +60,22 @@ export default function UserDashboard() {
         }
         setWorkingDays(days);
         
-        const { count, error } = await supabase
+        const { count, data, error } = await supabase
           .from('kinerja_harian')
-          .select('*', { count: 'exact', head: true })
+          .select('*', { count: 'exact' })
           .eq('nip', user.username)
           .gte('tanggal', startOfMonth.toISOString())
-          .lte('tanggal', endOfMonth.toISOString());
+          .lte('tanggal', endOfMonth.toISOString())
+          .order('tanggal', { ascending: false });
           
-        if (!error) {
+        if (!error && data) {
           const inputs = count || 0;
           const pct = days > 0 ? Math.round((inputs / days) * 100) : 0;
           setPerformancePercentage(pct);
+          setRecentActivities(data.slice(0, 5));
+          if (data.length > 0) {
+            setLatestActivity(data[0].aktivitas);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch performance", err);
@@ -68,13 +87,14 @@ export default function UserDashboard() {
   const role = user?.role || 'staf_pelaksana';
   const isPimpinanPuncak = ['camat', 'kapolsek', 'danramil'].includes(role);
   const isPimpinan = isPimpinanPuncak || role === 'sekcam' || role === 'admin';
-  const isManager = role === 'kasi';
-  const isStaf = role === 'staf_pelaksana' || role === 'staf_agenda';
+  const isManager = role === 'kasi' || role === 'kabag' || role === 'kasubag';
+  const staffRoles = ['pelaksana', 'staf_pelaksana', 'staf_agenda', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'];
+  const isStaf = staffRoles.includes(role);
   
   // Tasks assigned to downline staff (for Manager view)
   const staffTasks = tasks.filter(t => {
      const assignedUser = usersList.find(u => u.name === t.assignedTo || u.username === t.assignedTo);
-     return assignedUser && (assignedUser.role === 'staf_pelaksana' || assignedUser.role === 'staf_agenda');
+     return assignedUser && staffRoles.includes(assignedUser.role);
   });
 
 
@@ -90,18 +110,22 @@ export default function UserDashboard() {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(config.supabaseUrl, config.supabaseKey);
         
-        const { error } = await supabase.from('kinerja_harian').insert([{
+        const newActivityObj = {
+          id: Math.random().toString(), // temp ID
           nip: user.username,
           aktivitas: activity,
           tanggal: new Date().toISOString()
-        }]);
+        };
+
+        const { error } = await supabase.from('kinerja_harian').insert([newActivityObj]);
 
         if (error) throw error;
         
-        // Optimistically update performance percentage
+        // Optimistically update performance percentage and list
         const currentInputsCount = Math.round((performancePercentage / 100) * workingDays);
         const newInputs = currentInputsCount + 1;
         setPerformancePercentage(workingDays > 0 ? Math.round((newInputs / workingDays) * 100) : 0);
+        setRecentActivities(prev => [newActivityObj, ...prev].slice(0, 5));
         addNotification('Jurnal kinerja harian berhasil dicatat dan disimpan di database.');
       } catch (err: any) {
         console.error("Error saving activity:", err);
@@ -362,12 +386,12 @@ export default function UserDashboard() {
                         <div className="col-span-1 md:col-span-2 flex flex-col items-end mt-2 md:mt-0 gap-2">
                           <div className="text-[10px] font-bold text-gray-500 w-full md:text-right">Progres: {task.progress || 0}%</div>
                           <div className="flex bg-gray-100 rounded-lg p-1 w-full justify-between">
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 25)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">25</button>
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 50)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">50</button>
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 75)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">75</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 25)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">25%</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 50)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">50%</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 75)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">75%</button>
                           </div>
                           <button 
-                            onClick={() => updateTaskStatus(task.id, 'completed', 'Tugas diselesaikan oleh Target', undefined, 100)}
+                            onClick={() => setFeedbackTaskId(task.id)}
                             className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95 group-hover:-translate-y-0.5"
                             style={{ backgroundColor: config.primaryColor }}
                           >
@@ -383,6 +407,48 @@ export default function UserDashboard() {
             </div>
           )}
         </div>
+      )}
+
+      {/* FEEDBACK MODAL */}
+      {feedbackTaskId && (
+         <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4" onClick={() => setFeedbackTaskId(null)}>
+            <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+               <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2.5 bg-green-50 text-green-600 rounded-xl shadow-sm">
+                     <CheckCircle size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Selesaikan Tugas</h3>
+                    <p className="text-sm text-gray-500 font-medium">Beri laporan / respons kepada pimpinan.</p>
+                  </div>
+               </div>
+               
+               <textarea
+                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:border-transparent outline-none resize-none transition-all duration-300 mb-4"
+                  style={{ '--tw-ring-color': config.primaryColor } as any}
+                  rows={4}
+                  placeholder="(Opsional) Tulis laporan singkat pelaksanaan tugas, kendala, atau feedback untuk atasan..."
+                  value={feedbackText}
+                  onChange={(e) => setFeedbackText(e.target.value)}
+               />
+               
+               <div className="flex justify-end gap-3">
+                  <button 
+                     onClick={() => setFeedbackTaskId(null)}
+                     className="px-4 py-2 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all"
+                  >
+                     Batal
+                  </button>
+                  <button 
+                     onClick={submitCompletionFeedback}
+                     className="px-4 py-2 flex items-center gap-2 rounded-xl font-bold text-white shadow-sm hover:shadow-md active:scale-95 transition-all"
+                     style={{ backgroundColor: config.primaryColor }}
+                  >
+                     <Send size={16} /> Laporkan Selesai
+                  </button>
+               </div>
+            </div>
+         </div>
       )}
 
       {/* 3. AKTIVITAS HARIAN FORM (Isian Mandiri Semua User) */}
@@ -416,6 +482,30 @@ export default function UserDashboard() {
             </button>
           </div>
         </form>
+        
+        {recentActivities.length > 0 && (
+           <div className="mt-8 pt-6 border-t border-gray-100">
+              <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                 <ClipboardList size={16} className="text-indigo-600" />
+                 Daftar Uraian Tugas Terealisasi (Terbaru)
+              </h4>
+              <div className="space-y-3">
+                 {recentActivities.map((act) => (
+                    <div key={act.id} className="p-3.5 bg-gray-50 rounded-xl border border-gray-100 flex items-start gap-3">
+                       <div className="p-1.5 bg-green-100 text-green-600 rounded-lg shrink-0 mt-0.5">
+                          <CheckCircle2 size={14} />
+                       </div>
+                       <div className="flex-1">
+                          <p className="text-sm font-medium text-gray-800 leading-snug">{act.aktivitas}</p>
+                          <span className="text-[10px] uppercase font-bold text-gray-400 mt-1.5 block">
+                             {format(new Date(act.tanggal || new Date()), 'dd MMM yyyy, HH:mm', { locale: localeId })}
+                          </span>
+                       </div>
+                    </div>
+                 ))}
+              </div>
+           </div>
+        )}
       </div>
 
     </div>

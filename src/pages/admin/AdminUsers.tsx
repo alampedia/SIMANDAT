@@ -202,6 +202,17 @@ export default function AdminUsers() {
                     <option value="kapolsek">Kapolsek</option>
                     <option value="danramil">Danramil</option>
                     <option value="admin">Administrator</option>
+                    <optgroup label="TNI / POLRI (Pelaksana)">
+                       <option value="sertu">Sertu</option>
+                       <option value="serma">Serma</option>
+                       <option value="praka">Praka</option>
+                       <option value="serda">Serda</option>
+                       <option value="serka">Serka</option>
+                       <option value="aipda">Aipda</option>
+                       <option value="aiptu">Aiptu</option>
+                       <option value="bripka">Bripka</option>
+                       <option value="briptu">Briptu</option>
+                    </optgroup>
                   </select>
                </div>
                <div>

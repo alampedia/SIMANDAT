@@ -130,12 +130,25 @@ ALTER TABLE public.dokumen_referensi ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.app_tasks ENABLE ROW LEVEL SECURITY;
 
 -- Kebijakan akses bypass RLS (Izinkan semua untuk testing frontend)
+DROP POLICY IF EXISTS "Enable all access for anons on pegawai" ON public.pegawai;
 CREATE POLICY "Enable all access for anons on pegawai" ON public.pegawai FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on kinerja_harian" ON public.kinerja_harian;
 CREATE POLICY "Enable all access for anons on kinerja_harian" ON public.kinerja_harian FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on manajemen_surat" ON public.manajemen_surat;
 CREATE POLICY "Enable all access for anons on manajemen_surat" ON public.manajemen_surat FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on disposisi" ON public.disposisi;
 CREATE POLICY "Enable all access for anons on disposisi" ON public.disposisi FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on tracking_kinerja" ON public.tracking_kinerja;
 CREATE POLICY "Enable all access for anons on tracking_kinerja" ON public.tracking_kinerja FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on dokumen_referensi" ON public.dokumen_referensi;
 CREATE POLICY "Enable all access for anons on dokumen_referensi" ON public.dokumen_referensi FOR ALL USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Enable all access for anons on app_tasks" ON public.app_tasks;
 CREATE POLICY "Enable all access for anons on app_tasks" ON public.app_tasks FOR ALL USING (true) WITH CHECK (true);
 
 -- 10. Tabel referensi konfigurasi aplikasi
@@ -145,11 +158,19 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
     app_logo TEXT DEFAULT '',
     primary_color TEXT DEFAULT '#4f46e5',
     wa_api_key TEXT,
+    wa_group_id TEXT,
+    wa_webhook_url TEXT,
     gemini_api_key TEXT,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Ensure columns exist if table was already created
+ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_api_key TEXT;
+ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_group_id TEXT;
+ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_webhook_url TEXT;
+
 ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Enable all access for anons on app_settings" ON public.app_settings;
 CREATE POLICY "Enable all access for anons on app_settings" ON public.app_settings FOR ALL USING (true) WITH CHECK (true);
 
-INSERT INTO public.app_settings (id, app_name) VALUES ('global', 'SIMANDAT') ON CONFLICT DO NOTHING;
+INSERT INTO public.app_settings (id, app_name, wa_api_key, wa_group_id, wa_webhook_url) VALUES ('global', 'SIMANDAT', '1cJnf2tcHCFcfi8wPHDt', '120363426010181190@g.us', 'https://simandat.netlify.app/') ON CONFLICT DO NOTHING;
