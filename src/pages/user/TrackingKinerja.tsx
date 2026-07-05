@@ -17,7 +17,7 @@ const STATUS_LABELS = {
 const STATUS_COLORS = {
   'pending_sekcam': 'border-gray-200 text-gray-700 bg-gray-50',
   'pending_camat': 'border-blue-200 text-blue-700 bg-blue-50',
-  'pending_target': 'border-indigo-200 text-indigo-700 bg-indigo-50',
+  'pending_target': 'border-blue-200 text-blue-700 bg-blue-50',
   'in_progress': 'border-amber-200 text-amber-700 bg-amber-50',
   'completed': 'border-green-200 text-green-700 bg-green-50',
   'overdue': 'border-red-200 text-red-700 bg-red-50',
@@ -62,7 +62,7 @@ export default function TrackingKinerja() {
     <div className="space-y-6 lg:px-4 pb-10">
       <header className="mb-4">
         <h1 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-           <Target className="text-indigo-600" /> Tracking Kinerja
+           <Target className="text-blue-600" /> Tracking Kinerja
         </h1>
         <p className="text-gray-500 text-sm mt-1">Sistem pelaporan progres tugas dan update aksi lapangan.</p>
       </header>
@@ -72,7 +72,7 @@ export default function TrackingKinerja() {
            <div className="text-center py-10 text-gray-500 bg-white border border-dashed rounded-3xl">Belum ada data prioritas kinerja yang perlu di-update.</div>
          ) : trackingTasks.map(task => (
              <div key={task.id} className="bg-white rounded-3xl p-5 md:p-6 border border-gray-100 shadow-sm flex flex-col md:flex-row gap-6 relative overflow-hidden group">
-              <div className={cn("absolute left-0 top-0 bottom-0 w-1.5", task.status === 'completed' ? 'bg-green-500' : task.status === 'overdue' ? 'bg-red-500' : 'bg-indigo-500')} />
+              <div className={cn("absolute left-0 top-0 bottom-0 w-1.5", task.status === 'completed' ? 'bg-green-500' : task.status === 'overdue' ? 'bg-red-500' : 'bg-blue-500')} />
               
               <div className="flex-1 space-y-3">
                  <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -105,7 +105,7 @@ export default function TrackingKinerja() {
                        {activeTaskForm === task.id ? (
                          <div className="space-y-2 flex-1 relative">
                             <textarea
-                              className="w-full text-sm p-3 rounded-xl border border-indigo-200 outline-none focus:ring-2 focus:ring-indigo-100 resize-none"
+                              className="w-full text-sm p-3 rounded-xl border border-blue-200 outline-none focus:ring-2 focus:ring-blue-100 resize-none"
                               rows={3}
                               placeholder="Ketik catatan progres / lampiran tindak lanjut di sini..."
                               value={updateNote}
@@ -116,7 +116,7 @@ export default function TrackingKinerja() {
                                  <button
                                    key={action}
                                    onClick={() => handleUpdateProgress(task.id, action)}
-                                   className="flex-1 text-xs font-semibold px-3 py-2 bg-indigo-600 text-white rounded-lg shadow-md hover:bg-indigo-700 active:scale-95 flex justify-center items-center gap-1.5"
+                                   className="flex-1 text-xs font-semibold px-3 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 active:scale-95 flex justify-center items-center gap-1.5"
                                  >
                                     Lanjut <ArrowRight size={14} />
                                  </button>
@@ -133,7 +133,7 @@ export default function TrackingKinerja() {
                              setActiveTaskForm(task.id);
                              setUpdateNote('');
                            }}
-                           className="w-full mt-auto flex items-center justify-center gap-2 text-indigo-700 bg-indigo-50 border border-indigo-200 font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
+                           className="w-full mt-auto flex items-center justify-center gap-2 text-blue-700 bg-blue-50 border border-blue-200 font-semibold px-4 py-2.5 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
                          >
                             <MessageSquare size={16} /> Isi Laporan Kinerja
                          </button>

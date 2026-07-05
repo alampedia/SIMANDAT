@@ -17,7 +17,7 @@ const STATUS_LABELS = {
 const STATUS_COLORS = {
   'pending_verifikasi': 'bg-gray-100 text-gray-700 border-gray-200',
   'pending_instruksi': 'bg-blue-50 text-blue-700 border-blue-200',
-  'pending_delegasi': 'bg-indigo-50 text-indigo-700 border-indigo-200',
+  'pending_delegasi': 'bg-blue-50 text-blue-700 border-blue-200',
   'in_progress': 'bg-amber-50 text-amber-700 border-amber-200',
   'completed': 'bg-green-50 text-green-700 border-green-200',
   'overdue': 'bg-red-50 text-red-700 border-red-200',
@@ -92,7 +92,7 @@ export default function AdminMonitoring() {
                     <td className="p-4">
                        <button 
                          onClick={() => setSelectedTask(selectedTask === task.id ? null : task.id)}
-                         className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-indigo-600"
+                         className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 hover:bg-gray-100 text-blue-600"
                        >
                          {selectedTask === task.id ? 'Tutup' : 'Detail'}
                          <ChevronDown size={16} className={cn("transition-transform", selectedTask === task.id && "rotate-180")} />
@@ -114,7 +114,7 @@ export default function AdminMonitoring() {
                             <div className="space-y-4 relative before:absolute before:inset-0 before:ml-2 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-200 before:to-transparent">
                                {task.history.map((h, i) => (
                                  <div key={i} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group flex-row-reverse">
-                                    <div className="flex items-center justify-center w-4 h-4 rounded-full border border-white bg-indigo-500 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm relative z-10" />
+                                    <div className="flex items-center justify-center w-4 h-4 rounded-full border border-white bg-blue-500 shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow-sm relative z-10" />
                                     <div className="w-[calc(100%-2rem)] md:w-[calc(50%-1.5rem)] p-3 rounded-lg border border-gray-100 bg-white shadow-sm">
                                       <div className="flex items-center justify-between mb-1">
                                         <span className="font-semibold text-xs text-gray-900">{h.actor}</span>

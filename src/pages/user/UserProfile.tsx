@@ -34,8 +34,8 @@ export default function UserProfile() {
         <div className="relative z-10 flex flex-col items-center pt-4">
            {/* Avatar */}
            <div className="w-24 h-24 rounded-full bg-white/20 backdrop-blur-md border-4 border-white/30 p-1 mb-4">
-              <div className="w-full h-full rounded-full bg-indigo-200 overflow-hidden flex items-center justify-center">
-                <User size={40} className="text-indigo-400" />
+              <div className="w-full h-full rounded-full bg-blue-200 overflow-hidden flex items-center justify-center">
+                <User size={40} className="text-blue-400" />
               </div>
            </div>
            
@@ -52,7 +52,7 @@ export default function UserProfile() {
       {/* Account Info Form */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
         <h3 className="font-bold text-gray-900 mb-6 flex items-center gap-2">
-           <User size={18} className="text-indigo-600" />
+           <User size={18} className="text-blue-600" />
            Informasi Akun
         </h3>
         

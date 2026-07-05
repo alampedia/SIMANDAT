@@ -85,8 +85,9 @@ export default function UserDashboard() {
   }, [user, config.supabaseUrl, config.supabaseKey]);
 
   const role = user?.role || 'staf_pelaksana';
-  const isPimpinanPuncak = ['camat', 'kapolsek', 'danramil'].includes(role);
-  const isPimpinan = isPimpinanPuncak || role === 'sekcam' || role === 'admin';
+  const roleLower = role.toLowerCase();
+  const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isPimpinan = isPimpinanPuncak || roleLower.includes('sekcam') || role === 'admin';
   const isManager = role === 'kasi' || role === 'kabag' || role === 'kasubag';
   const staffRoles = ['pelaksana', 'staf_pelaksana', 'staf_agenda', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'];
   const isStaf = staffRoles.includes(role);
@@ -210,7 +211,7 @@ export default function UserDashboard() {
                 onClick={() => setIsPersetujuanOpen(!isPersetujuanOpen)}
               >
                  <h3 className="font-bold text-gray-900 flex items-center gap-2">
-                    <FileText size={18} className="text-indigo-600" /> Naskah Dinas Perlu Persetujuan (Approve)
+                    <FileText size={18} className="text-blue-600" /> Naskah Dinas Perlu Persetujuan (Approve)
                  </h3>
                  <div className="flex items-center gap-3">
                    <span className="text-xs px-2.5 py-1 bg-gray-100 text-gray-700 font-bold rounded-lg">{incomingCamatTasks.length} Menunggu</span>
@@ -227,16 +228,16 @@ export default function UserDashboard() {
                    ) : (
                       <div className="space-y-3">
                         {incomingCamatTasks.map(task => (
-                          <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:bg-indigo-50/50 transition-colors">
+                          <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:bg-blue-50/50 transition-colors">
                             <div>
                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-indigo-100">{task.nomorSurat || task.id}</span>
+                                  <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-blue-100">{task.nomorSurat || task.id}</span>
                                   <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
                                </div>
                                <h4 className="font-bold text-gray-900 text-sm">{task.title}</h4>
                                <p className="text-xs text-gray-600 line-clamp-1"><span className="font-semibold text-gray-800">Usulan Target:</span> {task.assignedTo}</p>
                             </div>
-                            <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer block">
+                            <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer block">
                                Buka Halaman Validasi
                             </Link>
                           </div>
@@ -306,7 +307,7 @@ export default function UserDashboard() {
             onClick={() => setIsTugasOpen(!isTugasOpen)}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-sm">
+              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-sm">
                 <FileText size={20} />
               </div>
               <div>
@@ -351,11 +352,11 @@ export default function UserDashboard() {
                 {/* Table Body */}
                 <div className="flex flex-col divide-y divide-gray-100">
                   {myTasks.filter(t => t.status !== 'completed').map(task => (
-                    <div key={task.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-5 hover:bg-indigo-50/30 transition-colors items-center group">
+                    <div key={task.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-5 hover:bg-blue-50/30 transition-colors items-center group">
                         
                         {/* Column 1: Dokumen / Title */}
                         <div className="col-span-1 md:col-span-4 flex flex-col items-start gap-1">
-                          <span className="text-[10px] font-bold text-indigo-500 bg-indigo-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-indigo-100 mb-1">{task.id}</span>
+                          <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-blue-100 mb-1">{task.id}</span>
                           <h4 className="font-bold text-gray-900 text-sm leading-snug">{task.title}</h4>
                           {task.driveUrl && (
                              <a href={task.driveUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md mt-1 hover:bg-blue-100">Buka Lampiran Drive</a>
@@ -486,7 +487,7 @@ export default function UserDashboard() {
         {recentActivities.length > 0 && (
            <div className="mt-8 pt-6 border-t border-gray-100">
               <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                 <ClipboardList size={16} className="text-indigo-600" />
+                 <ClipboardList size={16} className="text-blue-600" />
                  Daftar Uraian Tugas Terealisasi (Terbaru)
               </h4>
               <div className="space-y-3">

@@ -157,7 +157,7 @@ export default function AdminUsers() {
            
            {/* Manual Input */}
            <div className="md:pr-8">
-             <div className="flex items-center gap-2 mb-4 text-indigo-600">
+             <div className="flex items-center gap-2 mb-4 text-blue-600">
                 <UserPlus size={18} />
                 <h3 className="font-bold">Input Pengguna Manual</h3>
              </div>
@@ -269,7 +269,7 @@ export default function AdminUsers() {
       <div className="bg-white border border-gray-100 rounded-2xl p-6 mt-8 shadow-sm">
         <div className="flex items-center justify-between mb-4">
            <h2 className="font-bold text-gray-900 flex items-center gap-2">
-              <Users size={18} className="text-indigo-600" /> Daftar Pengguna Terdaftar ({usersList.length})
+              <Users size={18} className="text-blue-600" /> Daftar Pengguna Terdaftar ({usersList.length})
            </h2>
            <div className="relative w-full max-w-sm ml-auto">
              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -278,7 +278,7 @@ export default function AdminUsers() {
                placeholder="Cari berdasarkan nama atau NIP..."
                value={searchQuery}
                onChange={(e) => setSearchQuery(e.target.value)}
-               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-indigo-400 transition-colors bg-gray-50/50"
+               className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg outline-none focus:border-blue-400 transition-colors bg-gray-50/50"
              />
            </div>
         </div>
@@ -292,12 +292,12 @@ export default function AdminUsers() {
              {usersList
                .filter(u => u.name.toLowerCase().includes(searchQuery.toLowerCase()) || u.username.includes(searchQuery))
                .map(u => (
-                 <div key={u.id} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm flex flex-col hover:border-indigo-300 transition-colors">
+                 <div key={u.id} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm flex flex-col hover:border-blue-300 transition-colors">
                    <div className="flex justify-between items-start">
                      <span className="text-xs uppercase font-bold text-gray-400 mb-1">{u.role}</span>
                    </div>
                    <span className="font-semibold text-gray-800 text-sm whitespace-nowrap overflow-hidden text-ellipsis" title={u.name}>{u.name}</span>
-                   <span className="text-xs font-mono text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-md inline-block w-fit mt-1">NIP: {u.username}</span>
+                   <span className="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md inline-block w-fit mt-1">NIP: {u.username}</span>
                    {u.title && <p className="text-xs text-gray-500 mt-2 line-clamp-1">{u.title}</p>}
                  </div>
              ))}

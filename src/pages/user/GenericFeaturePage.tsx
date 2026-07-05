@@ -89,7 +89,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
         {isList && isAdmin && (kategori === 'jdih' || kategori === 'sop') && (
           <button 
              onClick={() => setShowModal(true)}
-             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm"
+             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm"
           >
             + Tambah URL Baru
           </button>
@@ -103,7 +103,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
             <input 
               type="text" 
               placeholder="Cari dokumen..." 
-              className="w-full bg-white border border-gray-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-indigo-500 shadow-sm transition-all"
+              className="w-full bg-white border border-gray-200 rounded-2xl pl-12 pr-4 py-3.5 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-blue-500 shadow-sm transition-all"
             />
           </div>
 
@@ -120,14 +120,14 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                 href={doc.link_drive}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group block bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-indigo-100 transition-all duration-300"
+                className="group block bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-blue-100 transition-all duration-300"
               >
                 <div className="flex gap-4 items-center">
-                  <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
                     <LinkIcon size={20} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-gray-900 text-sm truncate mb-1 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="font-bold text-gray-900 text-sm truncate mb-1 group-hover:text-blue-600 transition-colors">
                       {doc.judul}
                     </h3>
                     <div className="flex items-center gap-3 text-xs text-gray-500 font-medium">
@@ -135,7 +135,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                       {doc.deskripsi && <span className="truncate max-w-[150px] sm:max-w-xs">- {doc.deskripsi}</span>}
                     </div>
                   </div>
-                  <div className="shrink-0 p-2 text-gray-300 group-hover:text-indigo-500 transition-colors">
+                  <div className="shrink-0 p-2 text-gray-300 group-hover:text-blue-500 transition-colors">
                     <ExternalLink size={20} />
                   </div>
                 </div>
@@ -173,7 +173,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                     <input 
                       type="text" required
                       value={form.judul} onChange={e => setForm({...form, judul: e.target.value})}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                       placeholder={`Contoh: Dokumen Referensi / Link Drive`}
                     />
                   </div>
@@ -182,7 +182,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                     <input 
                       type="url" required
                       value={form.link_drive} onChange={e => setForm({...form, link_drive: e.target.value})}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                       placeholder="https://drive.google.com/..."
                     />
                   </div>
@@ -190,13 +190,13 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                     <label className="block text-xs font-bold text-gray-700 mb-1.5 uppercase tracking-wider">Deskripsi (Opsional)</label>
                     <textarea 
                       value={form.deskripsi} onChange={e => setForm({...form, deskripsi: e.target.value})}
-                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
                       placeholder="Catatan tambahan..." rows={2}
                     />
                   </div>
 
                   <div className="pt-2">
-                    <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(79,70,229,0.2)]">
+                    <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_4px_12px_rgba(79,70,229,0.2)]">
                       Simpan Ke Database
                     </button>
                   </div>

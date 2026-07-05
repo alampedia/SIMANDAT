@@ -25,7 +25,7 @@ export default function StatusPekerjaanStaf() {
             <input 
               type="text" 
               placeholder="Cari tugas, nama staf..." 
-              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-indigo-500 transition-all"
+              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-blue-500 transition-all"
             />
           </div>
           <button className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50">

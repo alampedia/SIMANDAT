@@ -11,7 +11,8 @@ export default function ManajemenSurat() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'masuk' | 'keluar' | 'arsip'>('masuk');
   
-  const isPimpinanPuncak = ['camat', 'kapolsek', 'danramil'].includes(user?.role || '');
+  const roleLower = (user?.role || '').toLowerCase();
+  const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
 
   const filteredDocs = tasks.filter(doc => activeTab === 'masuk' ? true : false); // simplifies logic to show all in masuk for now
 
@@ -82,7 +83,7 @@ export default function ManajemenSurat() {
         {(user?.role === 'admin' || user?.role === 'staf_agenda') && (
            <button 
              onClick={() => setIsNewDocOpen(true)}
-             className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
+             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
            >
              <Plus size={18} /> <span className="hidden sm:inline">Naskah Baru</span>
            </button>
@@ -98,7 +99,7 @@ export default function ManajemenSurat() {
             className={cn(
               "px-5 py-2.5 rounded-xl text-sm font-bold capitalize whitespace-nowrap transition-all",
               activeTab === tab
-                ? "bg-indigo-600 text-white shadow-md"
+                ? "bg-blue-600 text-white shadow-md"
                 : "bg-white text-gray-600 border border-gray-200 hover:bg-gray-50"
             )}
           >
@@ -114,7 +115,7 @@ export default function ManajemenSurat() {
             <input 
               type="text" 
               placeholder="Cari nomor surat, perihal, pengirim..." 
-              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-indigo-500 transition-all"
+              className="w-full bg-gray-50/50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 text-sm outline-none focus:ring-2 focus:border-transparent focus:ring-blue-500 transition-all"
             />
           </div>
           <button className="flex items-center gap-2 px-5 py-3 border border-gray-200 rounded-2xl text-sm font-bold text-gray-600 hover:bg-gray-50">
@@ -130,14 +131,14 @@ export default function ManajemenSurat() {
              </div>
           ) : (
             filteredDocs.map((doc) => (
-              <div key={doc.id} className="group block bg-gray-50/50 hover:bg-indigo-50/30 border border-gray-100 rounded-2xl p-5 transition-all duration-300">
+              <div key={doc.id} className="group block bg-gray-50/50 hover:bg-blue-50/30 border border-gray-100 rounded-2xl p-5 transition-all duration-300">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   
                   <div className="flex flex-col flex-1 gap-2">
-                     <span className="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded uppercase w-fit inline-flex items-center gap-1.5">
+                     <span className="text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded uppercase w-fit inline-flex items-center gap-1.5">
                         <FileText size={12} /> {doc.nomorSurat || doc.id}
                      </span>
-                     <h3 className="font-bold text-gray-900 group-hover:text-indigo-700 transition-colors leading-tight">
+                     <h3 className="font-bold text-gray-900 group-hover:text-blue-700 transition-colors leading-tight">
                         {doc.title}
                      </h3>
                      <div className="flex items-center gap-3 text-xs text-gray-500 font-medium mt-1">
@@ -161,7 +162,7 @@ export default function ManajemenSurat() {
                         {((doc.status === 'pending_sekcam' && user?.role === 'sekcam') || (doc.status === 'pending_camat' && isPimpinanPuncak)) && (
                           <button 
                             onClick={() => setDisposisiDoc(doc)}
-                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md hover:bg-indigo-700 active:scale-95 transition-all"
+                            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-95 transition-all"
                           >
                              <Send size={14} />
                              {user?.role === 'sekcam' ? 'Verifikasi & Mapping' : 'Approval & Teruskan'}
@@ -298,7 +299,7 @@ export default function ManajemenSurat() {
           <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
             <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
               <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                <Send size={18} className="text-indigo-600" /> Lembar Disposisi / Tindak Lanjut
+                <Send size={18} className="text-blue-600" /> Lembar Disposisi / Tindak Lanjut
               </h2>
               <button onClick={() => setDisposisiDoc(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 -mr-2">
                 <X size={20} />
@@ -306,8 +307,8 @@ export default function ManajemenSurat() {
             </div>
             
             <div className="p-6 overflow-y-auto flex-1">
-              <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-5">
-                <span className="text-[10px] uppercase font-bold text-indigo-500 tracking-wider">Identitas Naskah</span>
+              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5">
+                <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">Identitas Naskah</span>
                 <h3 className="font-bold text-gray-900 mt-1">{disposisiDoc.title}</h3>
                 <p className="text-xs text-gray-600">Pengirim: {disposisiDoc.sender}</p>
               </div>
@@ -354,7 +355,11 @@ export default function ManajemenSurat() {
                       className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
                     >
                       <option value="" disabled>-- Pilih Pejabat / Staf --</option>
-                      {usersList.filter(u => u.role !== 'admin' && !['camat', 'kapolsek', 'danramil'].includes(u.role) && (!user?.opd || u.opd === user?.opd)).map(u => (
+                      {usersList.filter(u => {
+                         const uRoleLower = (u.role || '').toLowerCase();
+                         const isPimpinanU = uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                         return u.role !== 'admin' && !isPimpinanU && (!user?.opd || u.opd === user?.opd);
+                      }).map(u => (
                         <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
                       ))}
                     </select>

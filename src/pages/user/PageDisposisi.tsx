@@ -12,12 +12,14 @@ export default function PageDisposisi() {
     // Filter task by user's OPD if applicable
     if (user?.opd && t.opd && t.opd !== user.opd) return false;
 
-    if (user?.role === 'sekcam') return t.status === 'pending_sekcam';
-    if (['camat', 'kapolsek', 'danramil'].includes(user?.role || '')) return t.status === 'pending_camat';
+    const roleLower = (user?.role || '').toLowerCase();
+    if (roleLower.includes('sekcam')) return t.status === 'pending_sekcam';
+    if (roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil')) return t.status === 'pending_camat';
     return false;
   });
   
-  const isPimpinan = ['camat', 'kapolsek', 'danramil'].includes(user?.role || '');
+  const roleLower = (user?.role || '').toLowerCase();
+  const isPimpinan = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
 
   const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
   
@@ -80,7 +82,7 @@ export default function PageDisposisi() {
        {!selectedTask ? (
          <div className="space-y-4">
             <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center gap-2">
-               <Clock size={16} className="text-indigo-600" /> Menunggu {isPimpinan ? 'Persetujuan' : 'Arahan'} ({incomingLetters.length})
+               <Clock size={16} className="text-blue-600" /> Menunggu {isPimpinan ? 'Persetujuan' : 'Arahan'} ({incomingLetters.length})
             </h3>
             
             {incomingLetters.length === 0 ? (
@@ -100,10 +102,10 @@ export default function PageDisposisi() {
                            setDisposisiForm(prev => ({...prev, tujuan: task.assignedTo || ''}));
                         }
                       }}
-                      className="text-left bg-white border border-gray-100 hover:border-indigo-300 hover:shadow-md transition-all rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden group"
+                      className="text-left bg-white border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden group"
                     >
                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <CheckSquare size={20} className="text-indigo-600" />
+                          <CheckSquare size={20} className="text-blue-600" />
                        </div>
                        
                        <div className="flex items-center gap-2">
@@ -129,7 +131,7 @@ export default function PageDisposisi() {
          <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 mb-6">
             <button 
                onClick={() => setSelectedTask(null)}
-               className="text-sm font-medium text-indigo-600 mb-4 flex items-center gap-1 hover:underline w-fit"
+               className="text-sm font-medium text-blue-600 mb-4 flex items-center gap-1 hover:underline w-fit"
             >
                ← Kembali ke Kotak Masuk
             </button>
@@ -140,7 +142,7 @@ export default function PageDisposisi() {
                <p className="text-sm text-gray-600">Pengirim: {selectedTask.sender}</p>
                {selectedTask.notesSekcam && (
                   <div className="mt-3 text-sm text-gray-700 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                     <span className="font-bold block mb-1 text-xs uppercase text-indigo-600">Catatan Sekcam:</span>
+                     <span className="font-bold block mb-1 text-xs uppercase text-blue-600">Catatan Sekcam:</span>
                      {selectedTask.notesSekcam}
                   </div>
                )}
@@ -148,7 +150,7 @@ export default function PageDisposisi() {
 
             <form onSubmit={handleDisposisi} className="space-y-5">
                <h3 className="font-bold text-sm uppercase tracking-wide text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
-                 <UserCheck size={16} className="text-indigo-600" /> 
+                 <UserCheck size={16} className="text-blue-600" /> 
                  {isPimpinan ? 'Validasi / Approval Disposisi' : 'Formulir Mapping Disposisi'}
                </h3>
                
@@ -163,7 +165,11 @@ export default function PageDisposisi() {
                       style={{ '--tw-ring-color': config.primaryColor } as any}
                    >
                       <option value="" disabled>-- Pilih Pejabat / Staf Tujuan --</option>
-                      {usersList.filter(u => u.role !== 'admin' && !['camat', 'kapolsek', 'danramil'].includes(u.role) && (!user?.opd || u.opd === user?.opd)).map(u => (
+                      {usersList.filter(u => {
+                         const uRoleLower = (u.role || '').toLowerCase();
+                         const isPimpinanU = uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                         return u.role !== 'admin' && !isPimpinanU && (!user?.opd || u.opd === user?.opd);
+                      }).map(u => (
                          <option key={u.id} value={u.name}>
                             {u.name} ({u.title})
                          </option>

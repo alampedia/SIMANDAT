@@ -17,7 +17,7 @@ export default function AdminDashboard() {
         <div className="space-y-4">
           {tasks.slice().reverse().map(task => (
             <div key={task.id} className="flex gap-4 border-b border-gray-50 pb-4 last:border-0 last:pb-0">
-               <div className="w-2 h-2 mt-2 rounded-full bg-indigo-500" />
+               <div className="w-2 h-2 mt-2 rounded-full bg-blue-500" />
                <div>
                   <p className="text-sm font-medium text-gray-900">{task.title}</p>
                   <p className="text-xs text-gray-500">Update terakhir: {new Date(task.history[task.history.length - 1].date).toLocaleString()}</p>

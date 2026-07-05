@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS public.app_tasks (
     deadline TEXT,
     progress INTEGER DEFAULT 0,
     history JSONB DEFAULT '[]'::jsonb,
+    opd TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -155,8 +156,9 @@ CREATE POLICY "Enable all access for anons on app_tasks" ON public.app_tasks FOR
 CREATE TABLE IF NOT EXISTS public.app_settings (
     id TEXT PRIMARY KEY DEFAULT 'global',
     app_name TEXT DEFAULT 'SIMANDAT',
+    app_description TEXT DEFAULT '',
     app_logo TEXT DEFAULT '',
-    primary_color TEXT DEFAULT '#4f46e5',
+    primary_color TEXT DEFAULT '#2563eb',
     wa_api_key TEXT,
     wa_group_id TEXT,
     wa_webhook_url TEXT,
@@ -165,6 +167,7 @@ CREATE TABLE IF NOT EXISTS public.app_settings (
 );
 
 -- Ensure columns exist if table was already created
+ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS app_description TEXT;
 ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_api_key TEXT;
 ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_group_id TEXT;
 ALTER TABLE public.app_settings ADD COLUMN IF NOT EXISTS wa_webhook_url TEXT;
@@ -173,4 +176,4 @@ ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS "Enable all access for anons on app_settings" ON public.app_settings;
 CREATE POLICY "Enable all access for anons on app_settings" ON public.app_settings FOR ALL USING (true) WITH CHECK (true);
 
-INSERT INTO public.app_settings (id, app_name, wa_api_key, wa_group_id, wa_webhook_url) VALUES ('global', 'SIMANDAT', '1cJnf2tcHCFcfi8wPHDt', '120363426010181190@g.us', 'https://simandat.netlify.app/') ON CONFLICT DO NOTHING;
+INSERT INTO public.app_settings (id, app_name, app_logo, wa_api_key, wa_group_id, wa_webhook_url) VALUES ('global', 'SIMANDAT', 'https://lh3.googleusercontent.com/d/11C8rXuMkNbeh8xleHHB7LcYgQwDggqYk', '1cJnf2tcHCFcfi8wPHDt', '120363426010181190@g.us', 'https://simandat.netlify.app/') ON CONFLICT (id) DO UPDATE SET app_logo = EXCLUDED.app_logo, app_name = EXCLUDED.app_name, primary_color = EXCLUDED.primary_color, wa_api_key = EXCLUDED.wa_api_key, wa_group_id = EXCLUDED.wa_group_id, wa_webhook_url = EXCLUDED.wa_webhook_url, app_description = EXCLUDED.app_description;

@@ -6,7 +6,7 @@ import { Outlet } from 'react-router-dom';
 
 export default function MobileAppLayout() {
   return (
-    <div className="min-h-screen bg-gray-50 font-sans selection:bg-indigo-100 selection:text-indigo-900 flex w-full overflow-hidden max-w-[100vw]">
+    <div className="min-h-screen font-sans selection:bg-blue-100 selection:text-blue-900 flex w-full overflow-hidden max-w-[100vw] bg-gray-50">
       <ToastContainer />
       
       {/* Desktop Sidebar (hidden on mobile) */}

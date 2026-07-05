@@ -65,11 +65,11 @@ const TUPOKSI_DB: Record<string, string[]> = {
 export default function TupoksiPage() {
   const { user, config } = useAppContext();
 
-  let effectiveRole = user?.role || 'staf_pelaksana';
+  let effectiveRole = (user?.role || 'staf_pelaksana').toLowerCase().trim();
   if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(effectiveRole)) {
     effectiveRole = 'staf_pelaksana';
   }
-  if (['danramil', 'kapolsek'].includes(effectiveRole)) {
+  if (effectiveRole.includes('danramil') || effectiveRole.includes('kapolsek') || effectiveRole.includes('camat')) {
     effectiveRole = 'camat';
   }
 
@@ -80,7 +80,7 @@ export default function TupoksiPage() {
   return (
     <div className="space-y-6 lg:px-4 pb-10">
       <header className="mb-6 flex items-center gap-3">
-        <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center shrink-0">
+        <div className="w-12 h-12 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center shrink-0">
            <Briefcase size={24} />
         </div>
         <div>
@@ -99,7 +99,7 @@ export default function TupoksiPage() {
             <div>
                <h3 className="font-bold text-lg text-gray-900 leading-tight">{user?.name}</h3>
                <p className="text-gray-600 text-sm">{user?.title}</p>
-               <span className="inline-flex px-2 py-0.5 mt-1 bg-indigo-100 text-indigo-800 text-[10px] font-bold rounded uppercase tracking-wider">
+               <span className="inline-flex px-2 py-0.5 mt-1 bg-blue-100 text-blue-800 text-[10px] font-bold rounded uppercase tracking-wider">
                  Role: {user?.role.replace('_', ' ')}
                </span>
             </div>
@@ -119,7 +119,7 @@ export default function TupoksiPage() {
                <div className="space-y-3 mb-8">
                   {activeTupoksi.map((item, index) => (
                     <div key={index} className="flex items-start gap-3 p-3 rounded-xl hover:bg-gray-50 transition-colors group border border-transparent hover:border-gray-100">
-                       <div className="w-6 h-6 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-colors shadow-sm">
+                       <div className="w-6 h-6 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold border border-blue-100 group-hover:bg-blue-600 group-hover:text-white transition-colors shadow-sm">
                           {index + 1}
                        </div>
                        <p className="text-sm text-gray-700 leading-relaxed font-medium">

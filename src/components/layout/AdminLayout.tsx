@@ -17,12 +17,14 @@ import {
   Target,
   PieChart,
   Briefcase,
-  Users
+  Users,
+  Moon,
+  Sun
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export default function AdminLayout() {
-  const { user, config, logout } = useAppContext();
+  const { user, config, logout, theme, toggleTheme } = useAppContext();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
@@ -47,13 +49,17 @@ export default function AdminLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
+    <div className="min-h-screen flex flex-col md:flex-row bg-gray-50">
       <ToastContainer />
       
       {/* Mobile Top Bar */}
       <div className="md:hidden bg-white border-b border-gray-200 p-4 flex items-center justify-between sticky top-0 z-20">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-inner" />
+          {config.appLogo ? (
+             <img src={config.appLogo} alt="Logo" className="w-8 h-8 object-contain" />
+          ) : (
+             <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-blue-600 to-emerald-400 flex items-center justify-center shadow-inner" />
+          )}
           <h1 className="font-bold text-gray-800">{config.appName}</h1>
         </div>
         <button onClick={() => setSidebarOpen(true)} className="p-2 text-gray-600">
@@ -76,7 +82,11 @@ export default function AdminLayout() {
       )}>
         <div className="p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-inner" />
+            {config.appLogo ? (
+               <img src={config.appLogo} alt="Logo" className="w-10 h-10 object-contain" />
+            ) : (
+               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-400 flex items-center justify-center shadow-inner" />
+            )}
             <div>
               <h1 className="font-bold text-lg text-gray-900 leading-tight">{config.appName}</h1>
               <p className="text-xs text-gray-500">Admin Panel</p>
@@ -90,7 +100,7 @@ export default function AdminLayout() {
         <div className="px-6 py-4 border-y border-gray-100 bg-gray-50/50">
           <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">User Aktif</p>
           <p className="text-sm font-bold text-gray-800">{user?.name}</p>
-          <span className="inline-block mt-1 px-2 py-1 bg-indigo-100 text-indigo-700 text-xs rounded-md font-medium capitalize">
+          <span className="inline-block mt-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-md font-medium capitalize">
             {user?.role}
           </span>
         </div>
@@ -107,7 +117,7 @@ export default function AdminLayout() {
                 className={({ isActive }) => cn(
                   "flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-colors",
                   isActive 
-                    ? "bg-indigo-50 text-indigo-700" 
+                    ? "bg-blue-50 text-blue-700" 
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 )}
                 style={({ isActive }) => isActive ? { 
@@ -122,7 +132,14 @@ export default function AdminLayout() {
           })}
         </nav>
 
-        <div className="p-4 mt-auto border-t border-gray-200">
+        <div className="p-4 mt-auto border-t border-gray-200 space-y-2">
+          <button 
+            onClick={toggleTheme}
+            className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+            {theme === 'dark' ? 'Mode Terang' : 'Mode Gelap'}
+          </button>
           <button 
             onClick={handleLogout}
             className="flex items-center gap-3 px-4 py-3 w-full rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"

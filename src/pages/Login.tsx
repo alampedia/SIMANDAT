@@ -29,7 +29,15 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#74fac6] via-[#5fb2fa] to-[#8854f9] p-4 relative overflow-hidden">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        backgroundImage: `linear-gradient(rgba(249, 250, 251, 0.7), rgba(249, 250, 251, 0.7)), url('https://lh3.googleusercontent.com/d/11C8rXuMkNbeh8xleHHB7LcYgQwDggqYk')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
       {/* Abstract Background Shapes (Ocean Depth) - Optional, can keep them for extra flavor or remove. Let's keep them very subtle */}
       <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-white/10 blur-[120px] pointer-events-none mix-blend-screen"></div>
       <div className="absolute bottom-[-10%] right-[-5%] w-[60%] h-[60%] rounded-full bg-blue-300/20 blur-[150px] pointer-events-none mix-blend-screen"></div>
@@ -41,7 +49,7 @@ export default function Login() {
         ) : (
           <div className="w-20 h-20 mx-auto bg-white rounded-2xl shadow-xl flex items-center justify-center mb-4 relative overflow-hidden group">
              <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-transparent z-10 pointer-events-none" />
-             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 shadow-[0_4px_10px_rgba(0,0,0,0.3)] transform rotate-12" />
+             <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-400 shadow-[0_4px_10px_rgba(0,0,0,0.3)] transform rotate-12" />
           </div>
         )}
         <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 mb-2">{config.appName}</h1>

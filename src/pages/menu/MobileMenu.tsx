@@ -145,7 +145,7 @@ export default function MobileMenu() {
      if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(userRole)) {
        userRole = 'staf_pelaksana';
      }
-     if (['danramil', 'kapolsek'].includes(userRole)) {
+     if (userRole.includes('danramil') || userRole.includes('kapolsek') || userRole.includes('camat')) {
        userRole = 'camat';
      }
      return menu.roles.includes(userRole);

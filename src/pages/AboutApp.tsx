@@ -35,12 +35,12 @@ export default function AboutApp() {
       {/* App Info Grid */}
       <div className="grid grid-cols-2 gap-3">
          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center text-center gap-2">
-            <Cpu size={24} className="text-indigo-500" />
+            <Cpu size={24} className="text-blue-500" />
             <h3 className="font-bold text-gray-800 text-sm">AI Powered</h3>
             <p className="text-xs text-gray-500">Analisis cerdas & asisten kognitif otomatis.</p>
          </div>
          <div className="bg-white border border-gray-100 shadow-sm rounded-2xl p-4 flex flex-col items-center text-center gap-2">
-            <Code2 size={24} className="text-indigo-500" />
+            <Code2 size={24} className="text-blue-500" />
             <h3 className="font-bold text-gray-800 text-sm">Real-time</h3>
             <p className="text-xs text-gray-500">Tracking naskah dinas seketika tanpa jeda.</p>
          </div>
@@ -48,12 +48,12 @@ export default function AboutApp() {
 
       {/* Innovator Profile */}
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden relative">
-         <div className="h-24 bg-gradient-to-r from-blue-100 to-indigo-100 w-full" />
+         <div className="h-24 bg-gradient-to-r from-blue-100 to-blue-100 w-full" />
          
          <div className="px-6 pb-6 relative">
             {/* Display Pic */}
             <div className="w-20 h-20 rounded-2xl bg-white shadow-lg p-1 border border-gray-100 absolute -top-10 flex items-center justify-center">
-               <div className="w-full h-full bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-400">
+               <div className="w-full h-full bg-blue-50 rounded-xl flex items-center justify-center text-blue-400">
                   <User size={40} />
                </div>
             </div>
@@ -63,7 +63,7 @@ export default function AboutApp() {
                  <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">MOCHAMMAD SYAFI'I, S.Pd, M.Pd.</h2>
                  <Award size={20} className="text-amber-500" />
                </div>
-               <p className="text-sm font-bold text-indigo-600 mb-4 tracking-wide uppercase">Inovator & Pemrakarsa Utama</p>
+               <p className="text-sm font-bold text-blue-600 mb-4 tracking-wide uppercase">Inovator & Pemrakarsa Utama</p>
                
                <p className="text-gray-600 text-sm leading-relaxed mb-6">
                  SI-MANDAT dikembangkan secara khusus untuk merevolusi tata kelola naskah dinas pemerintahan menjadi sistem yang cerdas, efisien, telusur (traceable), dan akuntabel.

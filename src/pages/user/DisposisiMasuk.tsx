@@ -32,8 +32,8 @@ export default function DisposisiMasuk() {
             </div>
           ) : (
             myTasks.map(task => (
-              <div key={task.id} className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between sm:items-center gap-4 relative overflow-hidden">
-                <div className={cn("absolute left-0 top-0 bottom-0 w-1.5", task.status === 'overdue' ? 'bg-red-500' : task.status === 'in_progress' ? 'bg-indigo-500' : 'bg-amber-400')} />
+              <div key={task.id} className="p-5 border border-gray-100 rounded-2xl bg-gray-50 hover:bg-white hover:border-blue-200 hover:shadow-md transition-all group flex flex-col sm:flex-row justify-between sm:items-center gap-4 relative overflow-hidden">
+                <div className={cn("absolute left-0 top-0 bottom-0 w-1.5", task.status === 'overdue' ? 'bg-red-500' : task.status === 'in_progress' ? 'bg-blue-500' : 'bg-amber-400')} />
                 
                 <div className="pl-2">
                    <div className="flex items-center gap-2 mb-2">
@@ -52,7 +52,7 @@ export default function DisposisiMasuk() {
                   <span className={cn(
                      "text-[10px] px-3 py-1.5 rounded-lg font-bold uppercase tracking-wide flex items-center gap-1.5 justify-center sm:justify-end",
                      task.status === 'pending_target' ? "bg-amber-100 text-amber-700 border border-amber-200" :
-                     task.status === 'in_progress' ? "bg-indigo-100 text-indigo-700 border border-indigo-200" :
+                     task.status === 'in_progress' ? "bg-blue-100 text-blue-700 border border-blue-200" :
                      "bg-red-100 text-red-700 border border-red-200"
                    )}>
                       {task.status === 'pending_target' ? <><Clock size={12}/> Menunggu Tindak Lanjut</> : 
@@ -66,14 +66,14 @@ export default function DisposisiMasuk() {
                           updateTaskStatus(task.id, 'in_progress', 'Mulai mengerjakan tindak lanjut dari disposisi', undefined, 10);
                           addNotification(`Status ${task.id} diubah menjadi Sedang Dikerjakan`);
                        }}
-                       className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-indigo-700 transition-all active:scale-95"
+                       className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white font-bold text-xs rounded-xl shadow-sm hover:bg-blue-700 transition-all active:scale-95"
                      >
                         <CheckCircle2 size={16} /> Konfirmasi Tindak Lanjut
                      </button>
                   ) : (
                      <button 
                        onClick={() => navigate('/tracking')}
-                       className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold text-xs rounded-xl shadow-sm hover:border-indigo-300 hover:text-indigo-600 transition-all active:scale-95"
+                       className="w-full sm:w-auto justify-center flex items-center gap-2 px-5 py-2.5 bg-white border border-gray-200 text-gray-700 font-bold text-xs rounded-xl shadow-sm hover:border-blue-300 hover:text-blue-600 transition-all active:scale-95"
                      >
                         Update Progres Kinerja →
                      </button>

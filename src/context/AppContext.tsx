@@ -60,6 +60,8 @@ interface AppContextType {
   addNotification: (message: string) => void;
   markNotificationsRead: () => void;
   usersList: User[];
+  theme: 'light' | 'dark';
+  toggleTheme: () => void;
 }
 
 
@@ -70,8 +72,8 @@ interface AppContextType {
 const initialConfig: AppConfig = {
   appName: 'SI-MANDAT',
   appDescription: 'Sistem Monitoring Tata Kelola Disposisi dan Manajemen Delegasi Antar-Teritorial',
-  appLogo: '',
-  primaryColor: '#4f46e5', // Indigo 600
+  appLogo: 'https://lh3.googleusercontent.com/d/1R6nREQ05GJ5GtTNljze0dJnbim_qiZxQ',
+  primaryColor: '#2563eb', // Blue 600
   waApiKey: '1cJnf2tcHCFcfi8wPHDt',
   waGroupId: '120363426010181190@g.us',
   waWebhookUrl: 'https://simandat.netlify.app/',
@@ -104,6 +106,25 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [tasks, setTasks] = useState<DisposisiTask[]>(initialTasks);
   const [notifications, setNotifications] = useState<{ id: string; message: string; read: boolean }[]>([]);
   const [dbUsers, setDbUsers] = useState<User[]>([]);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('simandat_theme') as 'light' | 'dark') || 'light';
+  });
+
+  const toggleTheme = () => {
+    setTheme(prev => {
+      const newTheme = prev === 'light' ? 'dark' : 'light';
+      localStorage.setItem('simandat_theme', newTheme);
+      return newTheme;
+    });
+  };
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [theme]);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--color-primary', config.primaryColor);
@@ -418,7 +439,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     
     if (newStatus === 'completed' && config.waApiKey && user) {
        // Send feedback to Atasan (e.g. Camat, Kapolsek or Sekcam) in the same OPD
-       const atasans = dbUsers.filter(u => ['camat', 'kapolsek', 'danramil', 'sekcam'].includes(u.role) && (!u.opd || u.opd === user.opd));
+       const atasans = dbUsers.filter(u => {
+           const uRoleLower = (u.role || '').toLowerCase();
+           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil') || uRoleLower.includes('sekcam')) && (!u.opd || u.opd === user.opd);
+       });
        for (const atasan of atasans) {
           if (atasan.phone) {
              const waMsg = `*SIMANDAT - LAPORAN SELESAI*\n\nHalo *${atasan.name}*,\n\nTugas *${currentTask.title}* telah diselesaikan oleh *${user.name}*.\n\n*Uraian/Catatan Pelaksana:* ${note || 'Tugas telah dilaksanakan.'}\n\nSilakan cek aplikasi SIMANDAT untuk verifikasi jika diperlukan.`;
@@ -490,7 +514,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, login, logout, config, updateConfig, tasks, addTask, updateTaskStatus, notifications, addNotification, markNotificationsRead, usersList: dbUsers
+      user, login, logout, config, updateConfig, tasks, addTask, updateTaskStatus, notifications, addNotification, markNotificationsRead, usersList: dbUsers, theme, toggleTheme
     }}>
       {children}
     </AppContext.Provider>
