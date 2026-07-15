@@ -7,19 +7,19 @@ import { id as localeId } from 'date-fns/locale';
 export default function PageDisposisi() {
   const { user, tasks, usersList, addNotification, config, updateTaskStatus } = useAppContext();
   
+  const roleLower = (user?.role || '').toLowerCase();
+  const isPimpinan = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+
   // Ambil surat yang perlu disposisi sesuai role
   const incomingLetters = tasks.filter(t => {
     // Filter task by user's OPD if applicable
     if (user?.opd && t.opd && t.opd !== user.opd) return false;
 
-    const roleLower = (user?.role || '').toLowerCase();
-    if (roleLower.includes('sekcam')) return t.status === 'pending_sekcam';
-    if (roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil')) return t.status === 'pending_camat';
+    if (isReviewer) return t.status === 'pending_sekcam';
+    if (isPimpinan) return t.status === 'pending_camat';
     return false;
   });
-  
-  const roleLower = (user?.role || '').toLowerCase();
-  const isPimpinan = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
 
   const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
   
@@ -42,12 +42,12 @@ export default function PageDisposisi() {
 
   const handleDisposisi = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTask || (user?.role === 'sekcam' && !disposisiForm.tujuan)) return;
+    if (!selectedTask || (isReviewer && !disposisiForm.tujuan)) return;
     
     const combinedNotes = `(Arahan: ${disposisiForm.instruksi}) ${disposisiForm.catatanKhusus} ${disposisiForm.linkDrive ? `\n[Link: ${disposisiForm.linkDrive}]` : ''}`.trim();
 
-    if (user?.role === 'sekcam') {
-        // Sekcam mem-forward ke Pimpinan untuk divalidasi
+    if (isReviewer) {
+        // Reviewer mem-forward ke Pimpinan untuk divalidasi
         // target sudah dipilih dari form
         updateTaskStatus(selectedTask.id, 'pending_camat', combinedNotes, disposisiForm.tujuan);
         addNotification(`Surat ${selectedTask.id} berhasil dimapping dan diteruskan ke pimpinan untuk persetujuan.`);
@@ -70,12 +70,12 @@ export default function PageDisposisi() {
     <div className="space-y-6 lg:px-4 pb-10">
        <header className="mb-2">
          <h1 className="text-2xl font-bold text-gray-900">
-            {user?.role === 'sekcam' ? 'Mapping / Disposisi (Sekcam)' : 'Validasi Disposisi Pimpinan'}
+            {isReviewer ? 'Mapping / Disposisi' : 'Validasi Disposisi Pimpinan'}
          </h1>
          <p className="text-gray-500 text-sm">
-            {user?.role === 'sekcam' 
-               ? 'Pilih tujuan dan beri draf arahan untuk disetujui Camat.'
-               : 'Berikan persetujuan untuk surat yang telah di-mapping oleh Sekcam.'}
+            {isReviewer 
+               ? 'Pilih tujuan dan beri draf arahan untuk disetujui Pimpinan.'
+               : 'Berikan persetujuan untuk surat yang telah di-mapping oleh Sekcam/Wakil.'}
          </p>
        </header>
 
@@ -142,7 +142,7 @@ export default function PageDisposisi() {
                <p className="text-sm text-gray-600">Pengirim: {selectedTask.sender}</p>
                {selectedTask.notesSekcam && (
                   <div className="mt-3 text-sm text-gray-700 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
-                     <span className="font-bold block mb-1 text-xs uppercase text-blue-600">Catatan Sekcam:</span>
+                     <span className="font-bold block mb-1 text-xs uppercase text-blue-600">Catatan Sekcam/Wakil:</span>
                      {selectedTask.notesSekcam}
                   </div>
                )}
@@ -158,7 +158,7 @@ export default function PageDisposisi() {
                  <label className="block text-sm font-bold text-gray-700 mb-2">Target Pejabat / Staf</label>
                  <div className="relative">
                    <select 
-                      required={user?.role === 'sekcam' || !selectedTask.assignedTo}
+                      required={isReviewer || !selectedTask.assignedTo}
                       value={disposisiForm.tujuan}
                       onChange={(e) => setDisposisiForm({...disposisiForm, tujuan: e.target.value})}
                       className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
@@ -199,14 +199,14 @@ export default function PageDisposisi() {
                  <textarea 
                     value={disposisiForm.catatanKhusus}
                     onChange={(e) => setDisposisiForm({...disposisiForm, catatanKhusus: e.target.value})}
-                    placeholder={user?.role === 'sekcam' ? "Contoh: Tolong siapkan bahan rapat koordinasi..." : "Komentar / Persetujuan tambahan..."}
+                    placeholder={isReviewer ? "Contoh: Tolong siapkan bahan rapat koordinasi..." : "Komentar / Persetujuan tambahan..."}
                     rows={3}
                     className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all resize-none"
                     style={{ '--tw-ring-color': config.primaryColor } as any}
                  />
                </div>
 
-               {user?.role === 'sekcam' && (
+               {isReviewer && (
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
                        URL Dokumen Drive <span className="font-normal text-xs text-gray-400">(Opsional)</span>

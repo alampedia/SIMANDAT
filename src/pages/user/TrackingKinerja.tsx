@@ -6,8 +6,8 @@ import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 
 const STATUS_LABELS = {
-  'pending_sekcam': 'Menunggu Validasi (Sekcam)',
-  'pending_camat': 'Menunggu Persetujuan (Camat)',
+  'pending_sekcam': 'Menunggu Validasi (Sekcam/Wakil)',
+  'pending_camat': 'Menunggu Persetujuan (Pimpinan)',
   'pending_target': 'Menunggu Tindak Lanjut',
   'in_progress': 'Sedang Dikerjakan (Staf)',
   'completed': 'Selesai',
@@ -85,8 +85,8 @@ export default function TrackingKinerja() {
                  <div>
                     <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{task.title}</h3>
                     {task.instructions && <p className="text-sm text-gray-600 font-medium whitespace-pre-wrap">Arahan: {task.instructions}</p>}
-                    {task.notesSekcam && <p className="text-sm text-gray-500 mt-1"><span className="font-semibold text-gray-600">Catatan Sekcam:</span> {task.notesSekcam}</p>}
-                    {task.notesCamat && <p className="text-sm text-gray-500 mt-1"><span className="font-semibold text-gray-600">Catatan Camat:</span> {task.notesCamat}</p>}
+                    {task.notesSekcam && <p className="text-sm text-gray-500 mt-1"><span className="font-semibold text-gray-600">Catatan Sekcam/Wakil:</span> {task.notesSekcam}</p>}
+                    {task.notesCamat && <p className="text-sm text-gray-500 mt-1"><span className="font-semibold text-gray-600">Catatan Pimpinan:</span> {task.notesCamat}</p>}
                  </div>
                  
                  <div className="flex items-center gap-4 text-xs font-medium text-gray-500">

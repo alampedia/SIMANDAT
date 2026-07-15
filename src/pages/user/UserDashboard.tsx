@@ -87,7 +87,8 @@ export default function UserDashboard() {
   const role = user?.role || 'staf_pelaksana';
   const roleLower = role.toLowerCase();
   const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isPimpinan = isPimpinanPuncak || roleLower.includes('sekcam') || role === 'admin';
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+  const isPimpinan = isPimpinanPuncak || isReviewer || role === 'admin';
   const isManager = role === 'kasi' || role === 'kabag' || role === 'kasubag';
   const staffRoles = ['pelaksana', 'staf_pelaksana', 'staf_agenda', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'];
   const isStaf = staffRoles.includes(role);
@@ -249,7 +250,7 @@ export default function UserDashboard() {
             </div>
           )}
 
-          {role === 'sekcam' && (
+          {isReviewer && (
             <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
               <div 
                 className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors"

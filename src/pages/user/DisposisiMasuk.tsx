@@ -44,8 +44,8 @@ export default function DisposisiMasuk() {
                    <div className="text-sm text-gray-600 space-y-1 bg-white p-3 rounded-xl border border-gray-100">
                       <p><span className="font-semibold text-gray-700">Pemberi Tugas/Pengirim:</span> {task.sender}</p>
                       {task.instructions && <p className="whitespace-pre-wrap"><span className="font-semibold text-gray-700">Arahan Pimpinan:</span> {task.instructions}</p>}
-                      {task.notesSekcam && <p className="text-xs mt-1 text-gray-500"><span className="font-bold">Catatan Sekcam:</span> {task.notesSekcam}</p>}
-                      {task.notesCamat && <p className="text-xs mt-1 text-gray-500"><span className="font-bold">Catatan Camat:</span> {task.notesCamat}</p>}
+                      {task.notesSekcam && <p className="text-xs mt-1 text-gray-500"><span className="font-bold">Catatan Sekcam/Wakil:</span> {task.notesSekcam}</p>}
+                      {task.notesCamat && <p className="text-xs mt-1 text-gray-500"><span className="font-bold">Catatan Pimpinan:</span> {task.notesCamat}</p>}
                    </div>
                 </div>
                 <div className="flex flex-col sm:items-end w-full sm:w-auto gap-2 shrink-0 border-t sm:border-t-0 pt-4 sm:pt-0 mt-2 sm:mt-0">

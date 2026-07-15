@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > src/pages/user/GenericFeaturePage.tsx
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { ExternalLink, Search, Clock, Link as LinkIcon, Plus, X, Edit, Trash2 } from 'lucide-react';
@@ -247,3 +248,4 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
     </div>
   );
 }
+INNER_EOF

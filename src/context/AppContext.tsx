@@ -377,7 +377,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const addTask = async (task: Omit<DisposisiTask, 'id' | 'history'>) => {
     const id = `ND-${new Date().getTime().toString().slice(-4)}`;
-    const historyUpdate = { date: new Date().toISOString(), action: 'Naskah dibuat dan diteruskan ke Sekcam', actor: user?.name || 'Sistem' };
+    const historyUpdate = { date: new Date().toISOString(), action: 'Naskah dibuat dan diteruskan ke Reviewer', actor: user?.name || 'Sistem' };
     
     // Default fallback locally
     setTasks(prev => [{ id, ...task, history: [historyUpdate] }, ...prev]);
@@ -415,8 +415,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateTaskStatus = async (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string) => {
     let actionMsg = `Status diubah ke ${newStatus}`;
-    if (newStatus === 'pending_camat') actionMsg = `Diteruskan ke Camat (Mapping oleh Sekcam)`;
-    if (newStatus === 'pending_target') actionMsg = `Disetujui Camat dan diteruskan ke Target`;
+    if (newStatus === 'pending_camat') actionMsg = `Diteruskan ke Pimpinan (Mapping oleh Reviewer)`;
+    if (newStatus === 'pending_target') actionMsg = `Disetujui Pimpinan dan diteruskan ke Target`;
     if (newStatus === 'in_progress') actionMsg = `Progres diperbarui${progress !== undefined ? ` (${progress}%)` : ''}`;
     
     const historyUpdate = { date: new Date().toISOString(), action: `${actionMsg}${note ? ' - Catatan: '+note : ''}`, actor: user?.name || 'Sistem' };

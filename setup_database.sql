@@ -177,3 +177,19 @@ DROP POLICY IF EXISTS "Enable all access for anons on app_settings" ON public.ap
 CREATE POLICY "Enable all access for anons on app_settings" ON public.app_settings FOR ALL USING (true) WITH CHECK (true);
 
 INSERT INTO public.app_settings (id, app_name, app_logo, wa_api_key, wa_group_id, wa_webhook_url) VALUES ('global', 'SIMANDAT', 'https://lh3.googleusercontent.com/d/11C8rXuMkNbeh8xleHHB7LcYgQwDggqYk', '1cJnf2tcHCFcfi8wPHDt', '120363426010181190@g.us', 'https://simandat.netlify.app/') ON CONFLICT (id) DO UPDATE SET app_logo = EXCLUDED.app_logo, app_name = EXCLUDED.app_name, primary_color = EXCLUDED.primary_color, wa_api_key = EXCLUDED.wa_api_key, wa_group_id = EXCLUDED.wa_group_id, wa_webhook_url = EXCLUDED.wa_webhook_url, app_description = EXCLUDED.app_description;
+-- 11. Buat tabel catatan_rapat (Meeting Notes)
+CREATE TABLE IF NOT EXISTS public.catatan_rapat (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    tanggal_jam TIMESTAMP WITH TIME ZONE NOT NULL,
+    judul_rapat TEXT NOT NULL,
+    narasumber_1 TEXT,
+    narasumber_2 TEXT,
+    materi TEXT,
+    tindak_lanjut TEXT,
+    created_by TEXT REFERENCES public.pegawai(nip) ON DELETE SET NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.catatan_rapat ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Enable all access for anons on catatan_rapat" ON public.catatan_rapat;
+CREATE POLICY "Enable all access for anons on catatan_rapat" ON public.catatan_rapat FOR ALL USING (true) WITH CHECK (true);

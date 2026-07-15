@@ -17,9 +17,10 @@ export default function CetakLaporan() {
      const role = user.role;
      const roleLower = role.toLowerCase();
      const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-     const isAdminOrSekcam = role === 'admin' || roleLower.includes('sekcam');
+     const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+     const isAdminOrReviewer = role === 'admin' || isReviewer;
      
-     if (isAdminOrSekcam) return true;
+     if (isAdminOrReviewer) return true;
      
      if (isPimpinanPuncak) {
         // Pimpinan sees tasks mapping to their opd or general, assuming all tasks available if they are Camat.
@@ -44,7 +45,7 @@ export default function CetakLaporan() {
   };
 
   const statusText = {
-    'pending_sekcam': 'Menunggu Sekcam',
+    'pending_sekcam': 'Menunggu Validasi (Sekcam/Wakil)',
     'pending_camat': 'Menunggu Pimpinan',
     'pending_target': 'Diteruskan ke Target',
     'in_progress': 'Sedang Diproses',
@@ -97,7 +98,7 @@ export default function CetakLaporan() {
               <option value="all">Semua Status</option>
               <option value="completed">Selesai</option>
               <option value="in_progress">Sedang Diproses</option>
-              <option value="pending_sekcam">Menunggu Sekcam</option>
+              <option value="pending_sekcam">Menunggu Validasi (Sekcam/Wakil)</option>
               <option value="pending_camat">Menunggu Pimpinan</option>
               <option value="pending_target">Menunggu Konfirmasi Target</option>
               <option value="overdue">Terlambat</option>

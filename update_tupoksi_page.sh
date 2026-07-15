@@ -1,3 +1,4 @@
+cat << 'INNER_EOF' > src/pages/user/TupoksiPage.tsx
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Briefcase, ShieldCheck, UserCircle2, Edit, Trash2, Plus, X, Save } from 'lucide-react';
@@ -236,3 +237,4 @@ export default function TupoksiPage() {
     </div>
   );
 }
+INNER_EOF

@@ -16,6 +16,7 @@ import MobileAppLayout from './components/layout/MobileAppLayout';
 import AboutApp from './pages/AboutApp';
 import TrackingKinerja from './pages/user/TrackingKinerja';
 import TupoksiPage from './pages/user/TupoksiPage';
+import CatatanRapat from './pages/user/CatatanRapat';
 import GenericFeaturePage from './pages/user/GenericFeaturePage';
 import ManajemenSurat from './pages/user/ManajemenSurat';
 import DisposisiMasuk from './pages/user/DisposisiMasuk';
@@ -98,6 +99,7 @@ function AppRoutes() {
              <Route path="/progress" element={<AdminLaporan />} />
              <Route path="/tracking" element={<TrackingKinerja />} />
              <Route path="/tupoksi" element={<TupoksiPage />} />
+             <Route path="/catatan-rapat" element={<CatatanRapat />} />
              
              {/* Admin routes reuse */}
              <Route path="/monitoring" element={<AdminMonitoring />} />

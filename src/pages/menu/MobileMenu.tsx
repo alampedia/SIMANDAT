@@ -10,6 +10,7 @@ import {
   Target,
   Briefcase,
   BookOpen,
+  NotebookPen,
   FileText,
   PieChart,
   Users
@@ -20,18 +21,6 @@ export default function MobileMenu() {
   const { user, config } = useAppContext();
   const navigate = useNavigate();
 
-  // Role Mapping:
-  // 1. Manajemen Surat (Admin, Sekcam, Camat)
-  // 2. Disposisi (Admin, Sekcam)
-  // 3. JDIH (Semua User)
-  // 4. SOP (Semua User)
-  // 5. Tracking Kinerja (Admin, Sekcam, Camat, Kabag, Kasi)
-  // 6. Verifikasi (Camat, Sekcam)
-  // 7. Progres (Grafik)
-  // 8. Monitoring & laporan (Admin, Sekcam, Camat)
-  // 9. Tupoksi (Semua User)
-
-  // Menu mappings based entirely on requested specification
   const menuConfig = [
     { 
        id: 'manajemen-surat', 
@@ -72,7 +61,7 @@ export default function MobileMenu() {
        id: 'laporan-kinerja',
        label: 'Laporan Kinerja',
        icon: BarChart3,
-       path: '/tracking', // reusing tracking path as personal report for staf
+       path: '/tracking',
        roles: ['staf_pelaksana', 'staf_agenda']
     },
     { 
@@ -108,6 +97,13 @@ export default function MobileMenu() {
        label: 'Tupoksi', 
        icon: Briefcase, 
        path: '/tupoksi', 
+       roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
+    },
+    { 
+       id: 'catatan-rapat', 
+       label: 'Catatan Rapat', 
+       icon: NotebookPen, 
+       path: '/catatan-rapat', 
        roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam', 'camat', 'kapolsek', 'danramil'] 
     },
     { 
@@ -148,20 +144,22 @@ export default function MobileMenu() {
      if (userRole.includes('danramil') || userRole.includes('kapolsek') || userRole.includes('camat')) {
        userRole = 'camat';
      }
+     if (userRole.includes('sekcam') || userRole.includes('wakapolsek') || userRole.includes('wadanramil') || userRole.includes('kasdim') || userRole.includes('kasat')) {
+       userRole = 'sekcam';
+     }
      return menu.roles.includes(userRole);
   });
 
-  // Colorful icon palette mapping based on reference image colors (Cyan, Yellow, Orange, Pink) + standard vibrant UI
   const menuColors = [
-    { bg: 'linear-gradient(135deg, #1cb0d6 0%, #0d85a3 100%)', shadow: '#1cb0d6' },   // Cyan
-    { bg: 'linear-gradient(135deg, #fce429 0%, #d4bc11 100%)', shadow: '#fce429' },   // Yellow
-    { bg: 'linear-gradient(135deg, #f26522 0%, #c44a11 100%)', shadow: '#f26522' },   // Orange
-    { bg: 'linear-gradient(135deg, #ce1a5b 0%, #990e40 100%)', shadow: '#ce1a5b' },   // Pink
-    { bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', shadow: '#3b82f6' },   // Blue
-    { bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', shadow: '#8b5cf6' },   // Purple
-    { bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', shadow: '#10b981' },   // Emerald
-    { bg: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)', shadow: '#f43f5e' },   // Rose
-    { bg: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 100%)', shadow: '#14b8a6' },   // Teal
+    { bg: 'linear-gradient(135deg, #1cb0d6 0%, #0d85a3 100%)', shadow: '#1cb0d6' },
+    { bg: 'linear-gradient(135deg, #fce429 0%, #d4bc11 100%)', shadow: '#fce429' },
+    { bg: 'linear-gradient(135deg, #f26522 0%, #c44a11 100%)', shadow: '#f26522' },
+    { bg: 'linear-gradient(135deg, #ce1a5b 0%, #990e40 100%)', shadow: '#ce1a5b' },
+    { bg: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)', shadow: '#3b82f6' },
+    { bg: 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)', shadow: '#8b5cf6' },
+    { bg: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', shadow: '#10b981' },
+    { bg: 'linear-gradient(135deg, #f43f5e 0%, #be123c 100%)', shadow: '#f43f5e' },
+    { bg: 'linear-gradient(135deg, #14b8a6 0%, #0f766e 100%)', shadow: '#14b8a6' },
   ];
 
   return (
@@ -180,26 +178,23 @@ export default function MobileMenu() {
       <div className="grid grid-cols-3 gap-3 md:gap-4 auto-rows-fr">
         {accessibleMenus.map((menu, i) => {
           const colorTheme = menuColors[i % menuColors.length];
-
           return (
             <button
               key={menu.id}
               onClick={() => navigate(menu.path)}
               className="group relative bg-white rounded-2xl p-3 md:p-4 border border-gray-100/50 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col items-center justify-center text-center h-full active:scale-[0.98]"
             >
-              {/* 3D Pure Icon Container */}
-              <div 
+              <div
                  className={cn(
                     "w-12 h-12 md:w-16 md:h-16 rounded-2xl mb-2 flex items-center justify-center transition-transform group-hover:-translate-y-1 relative"
                  )}
-                 style={{ 
-                   background: colorTheme.bg,
+                 style={{
+                    background: colorTheme.bg,
                    boxShadow: `0 8px 16px -4px ${colorTheme.shadow}50, inset 0 2px 4px rgba(255,255,255,0.4)`,
                    transformStyle: 'preserve-3d',
                    transform: 'perspective(400px) rotateX(15deg)'
                  }}
               >
-                 {/* 3D Depth Top Layer */}
                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent rounded-2xl pointer-events-none" />
                  <menu.icon size={24} className="text-white drop-shadow-md relative z-10 md:min-w-[28px] md:min-h-[28px]" />
               </div>

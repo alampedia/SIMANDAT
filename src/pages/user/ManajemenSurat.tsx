@@ -13,6 +13,7 @@ export default function ManajemenSurat() {
   
   const roleLower = (user?.role || '').toLowerCase();
   const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
 
   const filteredDocs = tasks.filter(doc => activeTab === 'masuk' ? true : false); // simplifies logic to show all in masuk for now
 
@@ -57,7 +58,7 @@ export default function ManajemenSurat() {
     // Only Sekcam routing to Camat OR Camat routing to Target
     // Simple logic based on current user:
     let newStatus: any = 'pending_camat';
-    if (user?.role === 'sekcam') {
+    if (isReviewer) {
         newStatus = 'pending_camat';
         updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
     } else if (isPimpinanPuncak) {
@@ -159,13 +160,13 @@ export default function ManajemenSurat() {
                      )}
                      
                      <div className="flex w-full sm:w-auto gap-2">
-                        {((doc.status === 'pending_sekcam' && user?.role === 'sekcam') || (doc.status === 'pending_camat' && isPimpinanPuncak)) && (
+                        {((doc.status === 'pending_sekcam' && isReviewer) || (doc.status === 'pending_camat' && isPimpinanPuncak)) && (
                           <button 
                             onClick={() => setDisposisiDoc(doc)}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-95 transition-all"
                           >
                              <Send size={14} />
-                             {user?.role === 'sekcam' ? 'Verifikasi & Mapping' : 'Approval & Teruskan'}
+                             {isReviewer ? 'Verifikasi & Mapping' : 'Approval & Teruskan'}
                           </button>
                         )}
                         <button className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-white text-gray-700 border border-gray-200 rounded-xl text-xs font-bold hover:bg-gray-50 transition-colors">
