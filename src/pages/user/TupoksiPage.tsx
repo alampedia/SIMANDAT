@@ -74,7 +74,7 @@ export default function TupoksiPage() {
   const defaultTupoksi = TUPOKSI_DB[effectiveRole] || [];
   
   // Use state to manage edited tupoksi lines
-  const initialTupoksi = user?.tupoksi ? user.tupoksi.split('\n').filter(Boolean) : defaultTupoksi;
+  const [initialTupoksi, setInitialTupoksi] = useState<string[]>(user?.tupoksi ? user.tupoksi.split('\n').filter(Boolean) : defaultTupoksi);
   const [editedTupoksi, setEditedTupoksi] = useState<string[]>(initialTupoksi);
 
   const activeTupoksi = isEditing ? editedTupoksi : initialTupoksi;
@@ -98,6 +98,7 @@ export default function TupoksiPage() {
         if (error) throw error;
         
         addNotification("Berhasil menyimpan Tupoksi.");
+        setInitialTupoksi(editedTupoksi);
         setIsEditing(false);
         
         // Update user context if available

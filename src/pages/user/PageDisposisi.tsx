@@ -9,7 +9,7 @@ export default function PageDisposisi() {
   
   const roleLower = (user?.role || '').toLowerCase();
   const isPimpinan = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
 
   // Ambil surat yang perlu disposisi sesuai role
   const incomingLetters = tasks.filter(t => {
@@ -140,6 +140,12 @@ export default function PageDisposisi() {
                <span className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1">Rincian Surat</span>
                <h3 className="font-bold text-lg text-gray-900 mb-1">{selectedTask.title}</h3>
                <p className="text-sm text-gray-600">Pengirim: {selectedTask.sender}</p>
+               {selectedTask.driveUrl && ( 
+                  <button type="button" onClick={() => window.open(selectedTask.driveUrl, "_blank")} className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors"> 
+                     <LinkIcon size={14} /> 
+                     Buka Dokumen 
+                  </button> 
+               )}
                {selectedTask.notesSekcam && (
                   <div className="mt-3 text-sm text-gray-700 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
                      <span className="font-bold block mb-1 text-xs uppercase text-blue-600">Catatan Sekcam/Wakil:</span>

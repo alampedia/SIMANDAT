@@ -49,13 +49,15 @@ export interface DisposisiTask {
 
 interface AppContextType {
   user: User | null;
-  login: (username: string, pass: string) => Promise<boolean>;
+  login: (username: string, pass: string) => Promise<{ success: boolean; message?: string }>;
   logout: () => void;
   config: AppConfig;
   updateConfig: (newConfig: Partial<AppConfig>) => void;
   tasks: DisposisiTask[];
   addTask: (task: Omit<DisposisiTask, 'id' | 'history'>) => void;
   updateTaskStatus: (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string) => void;
+  updateTask: (taskId: string, updates: Partial<DisposisiTask>) => Promise<void>;
+  deleteTask: (taskId: string) => Promise<void>;
   notifications: { id: string; message: string; read: boolean }[];
   addNotification: (message: string) => void;
   markNotificationsRead: () => void;
@@ -219,13 +221,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(intervalId);
   }, [user, tasks]);
 
-  const login = async (username: string, pass: string) => {
-    // Check supabase
+  const login = async (username: string, pass: string): Promise<{ success: boolean; message?: string }> => {
     if (config.supabaseUrl && config.supabaseKey) {
       try {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(config.supabaseUrl, config.supabaseKey);
         
+        // First check if table exists or has any users
+        const { count, error: countError } = await supabase.from('pegawai').select('*', { count: 'exact', head: true });
+        
+        if (countError) {
+           console.error("Table check error:", countError);
+           return { success: false, message: 'Database belum diatur (Tabel pegawai tidak ditemukan). Silakan jalankan Setup SQL di Supabase.' };
+        }
+        
+        if (count === 0) {
+           return { success: false, message: 'Belum ada pengguna terdaftar di database. Silakan jalankan skrip SQL awal.' };
+        }
+
         const { data, error } = await supabase
           .from('pegawai')
           .select('*')
@@ -247,16 +260,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           };
           setUser(userObj);
           localStorage.setItem('simandat_user', JSON.stringify(userObj));
-          return true;
+          return { success: true };
         } else {
            console.error('Login error from Supabase:', error ? error.message : 'User not found');
+           return { success: false, message: 'NIP atau password salah.' };
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('Supabase error:', err);
+        return { success: false, message: 'Gagal terhubung ke database Supabase.' };
       }
     }
-
-    return false;
+    return { success: false, message: 'Konfigurasi Supabase belum diisi. Hubungi Administrator.' };
   };
 
   const logout = () => {
@@ -393,7 +407,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           title: task.title,
           sender: task.sender,
           date: task.date,
-          status: 'pending_sekcam',
+          status: task.status || 'pending_sekcam',
           priority: task.priority,
           drive_url: task.driveUrl,
           assigned_to: task.assignedTo,
@@ -410,6 +424,52 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     } else {
       addNotification(`Naskah berhasil dibuat (hanya tersimpan sementara karena database Supabase belum terkonfigurasi).`);
+    }
+  };
+
+  
+  const updateTask = async (taskId: string, updates: Partial<DisposisiTask>) => {
+    setTasks(prev => prev.map(t => t.id === taskId ? { ...t, ...updates } : t));
+    
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        const dbUpdates: any = {};
+        if (updates.title !== undefined) dbUpdates.title = updates.title;
+        if (updates.nomorSurat !== undefined) dbUpdates.nomor_surat = updates.nomorSurat;
+        if (updates.sender !== undefined) dbUpdates.sender = updates.sender;
+        if (updates.priority !== undefined) dbUpdates.priority = updates.priority;
+        if (updates.driveUrl !== undefined) dbUpdates.drive_url = updates.driveUrl;
+        if (updates.assignedTo !== undefined) dbUpdates.assigned_to = updates.assignedTo;
+        
+        if (Object.keys(dbUpdates).length > 0) {
+           const { error } = await supabase.from('app_tasks').update(dbUpdates).eq('id', taskId);
+           if (error) throw error;
+        }
+      } catch (err: any) {
+        console.error("DB Error on updateTask", err);
+        addNotification(`Gagal mengupdate naskah di database: ${err.message}.`);
+      }
+    }
+  };
+
+  const deleteTask = async (taskId: string) => {
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+    
+    if (config.supabaseUrl && config.supabaseKey) {
+      try {
+        const { createClient } = await import('@supabase/supabase-js');
+        const supabase = createClient(config.supabaseUrl, config.supabaseKey);
+        
+        const { error } = await supabase.from('app_tasks').delete().eq('id', taskId);
+        if (error) throw error;
+        addNotification(`Naskah berhasil dihapus.`);
+      } catch (err: any) {
+        console.error("DB Error on deleteTask", err);
+        addNotification(`Gagal menghapus naskah di database: ${err.message}.`);
+      }
     }
   };
 
@@ -514,7 +574,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, login, logout, config, updateConfig, tasks, addTask, updateTaskStatus, notifications, addNotification, markNotificationsRead, usersList: dbUsers, theme, toggleTheme
+      user, login, logout, config, updateConfig, tasks, addTask, updateTaskStatus, updateTask, deleteTask, notifications, addNotification, markNotificationsRead, usersList: dbUsers, theme, toggleTheme
     }}>
       {children}
     </AppContext.Provider>

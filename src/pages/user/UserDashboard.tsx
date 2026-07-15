@@ -87,7 +87,7 @@ export default function UserDashboard() {
   const role = user?.role || 'staf_pelaksana';
   const roleLower = role.toLowerCase();
   const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
   const isPimpinan = isPimpinanPuncak || isReviewer || role === 'admin';
   const isManager = role === 'kasi' || role === 'kabag' || role === 'kasubag';
   const staffRoles = ['pelaksana', 'staf_pelaksana', 'staf_agenda', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'];

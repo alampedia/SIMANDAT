@@ -20,11 +20,11 @@ export default function Login() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const success = await login(username, password);
-    if (success) {
+    const result = await login(username, password);
+    if (result && result.success) {
       navigate('/');
     } else {
-      setError('Email/NIP atau password salah.');
+      setError(result?.message || 'Email/NIP atau password salah.');
     }
   };
 

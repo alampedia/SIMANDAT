@@ -23,6 +23,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
   const [docs, setDocs] = useState<Dokumen[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [detailDoc, setDetailDoc] = useState<Dokumen | null>(null);
   const [form, setForm] = useState({ id: '', judul: '', deskripsi: '', link_drive: '' });
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -147,7 +148,7 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
              </div>
           ) : (
             filteredDocs.map((doc) => (
-              <div key={doc.id} className="group block bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-blue-100 transition-all duration-300">
+              <div key={doc.id} className="group block bg-white rounded-2xl p-5 border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-blue-100 transition-all duration-300 cursor-pointer" onClick={() => setDetailDoc(doc)}>
                 <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
                   <div className="flex-1 min-w-0 w-full flex items-center gap-4">
                      <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
@@ -162,18 +163,18 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
                      </div>
                   </div>
                   <div className="flex items-center gap-2 shrink-0 self-end sm:self-auto">
-                     <a href={doc.link_drive} target="_blank" rel="noopener noreferrer" className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
+                     <a href={doc.link_drive} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors">
                         <ExternalLink size={16} />
                      </a>
                      {isAdmin && (
                         <>
-                           <button onClick={() => {
+                           <button onClick={(e) => { e.stopPropagation();
                               setForm({ id: doc.id, judul: doc.judul, deskripsi: doc.deskripsi || '', link_drive: doc.link_drive });
                               setShowModal(true);
                            }} className="p-2 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-colors">
                               <Edit size={16} />
                            </button>
-                           <button onClick={() => handleDelete(doc.id)} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
+                           <button onClick={(e) => { e.stopPropagation(); handleDelete(doc.id); }} className="p-2 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors">
                               <Trash2 size={16} />
                            </button>
                         </>
@@ -193,6 +194,62 @@ export default function GenericFeaturePage({ title, description, isList }: { tit
            <p className="text-gray-500 text-sm max-w-md mx-auto">
               Modul {title} saat ini telah aktif di rute dan akses role, namun fungsionalitas tabelnya sedang dalam penyempurnaan UI/UX agar presisi dan nyaman digunakan.
            </p>
+        </div>
+      )}
+
+      
+      {/* DETAIL MODAL */}
+      {detailDoc && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDetailDoc(null)} />
+          <div className="bg-white rounded-3xl w-full max-w-2xl relative z-10 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+               <h2 className="text-lg font-bold text-gray-900">Detail {title}</h2>
+               <button onClick={() => setDetailDoc(null)} className="p-2 text-gray-400 hover:text-red-500 rounded-full transition-colors -mr-2">
+                 <X size={20} />
+               </button>
+             </div>
+             <div className="p-6 overflow-y-auto space-y-6">
+                <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100 space-y-4">
+                   <div>
+                     <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Judul Dokumen</span>
+                     <p className="font-medium text-gray-900 text-lg">{detailDoc.judul}</p>
+                   </div>
+                   {detailDoc.deskripsi && (
+                     <div>
+                       <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Deskripsi</span>
+                       <p className="font-medium text-gray-700">{detailDoc.deskripsi}</p>
+                     </div>
+                   )}
+                   <div>
+                     <span className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1">Tanggal Dibuat</span>
+                     <p className="font-medium text-gray-900">{format(new Date(detailDoc.created_at), 'dd MMM yyyy, HH:mm', { locale: localeId })}</p>
+                   </div>
+                   <div className="pt-2">
+                     <a href={detailDoc.link_drive} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 rounded-xl font-bold text-sm hover:bg-blue-100 transition-colors">
+                        <ExternalLink size={16} /> Buka Dokumen Asli
+                     </a>
+                   </div>
+                   {isAdmin && (
+                     <div className="pt-4 flex gap-2 border-t border-gray-200 mt-4">
+                        <button onClick={() => {
+                          setForm({ id: detailDoc.id, judul: detailDoc.judul, deskripsi: detailDoc.deskripsi || '', link_drive: detailDoc.link_drive });
+                          setDetailDoc(null);
+                          setShowModal(true);
+                        }} className="flex-1 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl font-bold text-sm hover:bg-amber-100 transition-colors flex justify-center items-center gap-2">
+                          <Edit size={16} /> Edit
+                        </button>
+                        <button onClick={() => {
+                           handleDelete(detailDoc.id);
+                           setDetailDoc(null);
+                        }} className="flex-1 px-4 py-2 bg-red-50 text-red-700 rounded-xl font-bold text-sm hover:bg-red-100 transition-colors flex justify-center items-center gap-2">
+                          <Trash2 size={16} /> Hapus
+                        </button>
+                     </div>
+                   )}
+                </div>
+             </div>
+          </div>
         </div>
       )}
 
