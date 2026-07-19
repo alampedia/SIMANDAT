@@ -16,8 +16,8 @@ export default function CetakLaporan() {
      
      const role = user.role;
      const roleLower = role.toLowerCase();
-     const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-     const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+     const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+     const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
      const isAdminOrReviewer = role === 'admin' || isReviewer;
      
      if (isAdminOrReviewer) return true;
@@ -25,7 +25,7 @@ export default function CetakLaporan() {
      if (isPimpinanPuncak) {
         // Pimpinan sees tasks mapping to their opd or general, assuming all tasks available if they are Camat.
         // For kapolsek/danramil, ideally restricted by OPD but we show all for this demo or restrict by opd if you have it.
-        if (roleLower.includes('camat')) return true; 
+        if ((roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris'))) return true; 
         if (user.opd) return t.opd === user.opd; // If opd is set, filter by opd
         return true;
      }

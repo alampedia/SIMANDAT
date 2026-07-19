@@ -1,24 +1,14 @@
-import { clsx, type ClassValue } from 'clsx';
-import { twMerge } from 'tailwind-merge';
+const fs = require('fs');
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
+let utilsContent = fs.readFileSync('src/lib/utils.ts', 'utf8');
 
-export function isStaffRole(role: string): boolean {
-    const r = (role || '').toLowerCase();
-    return r.includes('pelaksana') || r.includes('staf') || ['sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(r);
-}
-
-export function isManagerRole(role: string): boolean {
-    const r = (role || '').toLowerCase();
-    return r.includes('kasi') || r.includes('kasubag') || r.includes('kabag') || r.includes('kanit');
-}
-
-export function isSubordinate(manager: { title?: string, role?: string, unitOrganisasi?: string }, staff: { title?: string, role?: string, unitOrganisasi?: string }): boolean {
+utilsContent = utilsContent.replace(
+  /export function isSubordinate[\s\S]*?return mWords\.some\(w => sWords\.includes\(w\)\);\n\}/,
+  `export function isSubordinate(manager: { title?: string, role?: string, unitOrganisasi?: string }, staff: { title?: string, role?: string, unitOrganisasi?: string }): boolean {
     const mStr = ((manager.role || '') + ' ' + (manager.title || '') + ' ' + (manager.unitOrganisasi || '')).toLowerCase();
     const sStr = ((staff.role || '') + ' ' + (staff.title || '') + ' ' + (staff.unitOrganisasi || '')).toLowerCase();
-    
+
+    // Explicit mapping based on user request (checks role, title, and unitOrganisasi combined):
     if (mStr.includes('pempel') && sStr.includes('pempel')) return true;
     if (mStr.includes('kesos') && sStr.includes('kesos')) return true;
     if (mStr.includes('umum') && sStr.includes('umum')) return true;
@@ -28,8 +18,9 @@ export function isSubordinate(manager: { title?: string, role?: string, unitOrga
     if (mStr.includes('pemerintahan') && sStr.includes('pemerintahan')) return true;
     if (mStr.includes('pelayanan') && sStr.includes('pelayanan')) return true;
     if (mStr.includes('keuangan') && sStr.includes('keuangan')) return true;
-
-    const getWords = (str: string) => (str || '').toLowerCase().replace(/kepala|kasi|kasubag|sub bagian|subbag|bagian|seksi|pelaksana|staf|role/g, ' ').trim().split(/\s+/).filter(w => w.length > 3 && w !== 'kecamatan' && w !== 'kraton');
+    
+    // Check by unit organisasi first if available
+    const getWords = (str: string) => (str || '').toLowerCase().replace(/kepala|kasi|kasubag|sub bagian|subbag|bagian|seksi|pelaksana|staf|role/g, ' ').trim().split(/\\s+/).filter(w => w.length > 3 && w !== 'kecamatan' && w !== 'kraton');
     
     if (manager.unitOrganisasi && staff.unitOrganisasi) {
         const mUnitWords = getWords(manager.unitOrganisasi);
@@ -40,9 +31,13 @@ export function isSubordinate(manager: { title?: string, role?: string, unitOrga
         }
     }
     
+    // Fallback to title/role checking
     const mWords = [...getWords(manager.title || ''), ...getWords(manager.role || ''), ...getWords(manager.unitOrganisasi || '')];
     const sWords = [...getWords(staff.title || ''), ...getWords(staff.role || ''), ...getWords(staff.unitOrganisasi || '')];
     
-    if (mWords.length === 0) return true;
+    if (mWords.length === 0) return true; // Fallback if manager has no specific section title
     return mWords.some(w => sWords.includes(w));
-}
+}`
+);
+
+fs.writeFileSync('src/lib/utils.ts', utilsContent);

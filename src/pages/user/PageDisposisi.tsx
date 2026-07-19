@@ -8,8 +8,8 @@ export default function PageDisposisi() {
   const { user, tasks, usersList, addNotification, config, updateTaskStatus } = useAppContext();
   
   const roleLower = (user?.role || '').toLowerCase();
-  const isPimpinan = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
+  const isPimpinan = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
 
   // Ambil surat yang perlu disposisi sesuai role
   const incomingLetters = tasks.filter(t => {
@@ -173,7 +173,7 @@ export default function PageDisposisi() {
                       <option value="" disabled>-- Pilih Pejabat / Staf Tujuan --</option>
                       {usersList.filter(u => {
                          const uRoleLower = (u.role || '').toLowerCase();
-                         const isPimpinanU = uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                         const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
                          return u.role !== 'admin' && !isPimpinanU && (!user?.opd || u.opd === user?.opd);
                       }).map(u => (
                          <option key={u.id} value={u.name}>

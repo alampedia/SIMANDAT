@@ -45,7 +45,7 @@ export default function MobileMenu() {
     },
     { 
        id: 'disposisi-masuk', 
-       label: 'Disposisi Masuk', 
+       label: 'Kotak Tugas & Mapping', 
        icon: FileText, 
        path: '/disposisi-masuk', 
        roles: ['admin', 'staf_pelaksana', 'staf_agenda', 'kasi', 'kabag', 'kasubag', 'sekcam'] 
@@ -137,17 +137,27 @@ export default function MobileMenu() {
   ];
 
   const accessibleMenus = menuConfig.filter(menu => {
-     let userRole = (user?.role || 'staf_pelaksana').toLowerCase().trim();
-     if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].includes(userRole)) {
-       userRole = 'staf_pelaksana';
+     let userRole = (user?.role || '').toLowerCase().trim();
+     let mappedRole = userRole;
+
+     if (userRole === 'admin') {
+         mappedRole = 'admin';
+     } else if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].some(r => userRole.includes(r)) || userRole.includes('staf')) {
+         mappedRole = 'staf_pelaksana';
+     } else if (userRole.includes('kasi')) {
+         mappedRole = 'kasi';
+     } else if (userRole.includes('kasubag')) {
+         mappedRole = 'kasubag';
+     } else if (userRole.includes('kabag')) {
+         mappedRole = 'kabag';
+     } else if (userRole.includes('sekcam') || userRole.includes('wakapolsek') || userRole.includes('wadanramil') || userRole.includes('kasdim') || userRole.includes('kasat')) {
+         mappedRole = 'sekcam';
+     } else if (userRole.includes('danramil') || userRole.includes('kapolsek') || (userRole.includes('camat') && !userRole.includes('sekcam') && !userRole.includes('sekretaris'))) {
+         mappedRole = 'camat';
      }
-     if (userRole.includes('danramil') || userRole.includes('kapolsek') || userRole.includes('camat')) {
-       userRole = 'camat';
-     }
-     if (userRole.includes('sekcam') || userRole.includes('wakapolsek') || userRole.includes('wadanramil') || userRole.includes('kasdim') || userRole.includes('kasat')) {
-       userRole = 'sekcam';
-     }
-     return menu.roles.includes(userRole);
+     
+     if (mappedRole === 'admin') return true;
+     return menu.roles.includes(mappedRole);
   });
 
   const menuColors = [

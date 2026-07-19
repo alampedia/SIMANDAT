@@ -12,8 +12,8 @@ export default function ManajemenSurat() {
   const [activeTab, setActiveTab] = useState<'masuk' | 'keluar' | 'arsip'>('masuk');
   
   const roleLower = (user?.role || '').toLowerCase();
-  const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
+  const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
 
   const filteredDocs = tasks.filter(doc => (doc.type || 'masuk') === activeTab);
 
@@ -25,7 +25,7 @@ export default function ManajemenSurat() {
   
   const [detailDoc, setDetailDoc] = useState<any>(null);
   const [editDoc, setEditDoc] = useState<any>(null);
-  const [editForm, setEditForm] = useState({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '' });
+  const [editForm, setEditForm] = useState({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '', tindakLanjut: 'verifikasi_sekcam' });
 
   const handleEditSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,9 +47,7 @@ export default function ManajemenSurat() {
     }
   };
 
-  const [newDoc, setNewDoc] = useState({
-    nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: ''
-  });
+  const [newDoc, setNewDoc] = useState({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '', tindakLanjut: 'verifikasi_sekcam' });
 
   React.useEffect(() => {
     if (isNewDocOpen && !newDoc.assignedTo) {
@@ -73,7 +71,7 @@ export default function ManajemenSurat() {
     e.preventDefault();
     if (!newDoc.title) return;
     
-    let newStatus = 'pending_sekcam'; // Selalu ke sekcam dulu untuk verifikasi
+    let newStatus = newDoc.tindakLanjut === 'tugas_langsung' ? 'pending_camat' : 'pending_sekcam';
 
     // Add task to global state
     addTask({
@@ -89,9 +87,9 @@ export default function ManajemenSurat() {
       progress: 0
     });
 
-       addNotification('Surat berhasil disimpan dan diteruskan ke Sekcam untuk tindak lanjut.');
+       addNotification(newStatus === 'pending_camat' ? 'Surat berhasil disimpan dan diteruskan ke Pimpinan untuk validasi tugas.' : 'Surat berhasil disimpan dan diteruskan ke Sekcam untuk tindak lanjut.');
     setIsNewDocOpen(false);
-    setNewDoc({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '' });
+    setNewDoc({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '', tindakLanjut: 'verifikasi_sekcam' });
   };
 
   const handleDisposisi = (e: React.FormEvent) => {
@@ -311,6 +309,45 @@ export default function ManajemenSurat() {
                       <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
                     </div>
                   </div>
+                  
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">URL / Link Lampiran (Drive, dll)</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="url"
+                      value={newDoc.driveUrl}
+                      onChange={e => setNewDoc({...newDoc, driveUrl: e.target.value})}
+                      placeholder="https://..."
+                      className="flex-1 bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      style={{ '--tw-ring-color': config.primaryColor } as any}
+                    />
+                    {newDoc.driveUrl && (
+                      <a 
+                        href={newDoc.driveUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-center px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold text-sm rounded-xl transition-colors shrink-0"
+                      >
+                        Preview
+                      </a>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Alur Proses Naskah</label>
+                  <div className="relative">
+                    <select 
+                      value={newDoc.tindakLanjut}
+                      onChange={e => setNewDoc({...newDoc, tindakLanjut: e.target.value})}
+                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                    >
+                      <option value="verifikasi_sekcam">Proses Review / Mapping (Sekcam -&gt; Camat)</option>
+                      <option value="tugas_langsung">Tugas Langsung ke Target</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1">Tujuan / Kepada (Opsional)</label>
                     <div className="relative">
@@ -385,7 +422,7 @@ export default function ManajemenSurat() {
                          if (u.role === 'admin') return false;
                          const uRoleLower = (u.role || '').toLowerCase();
                          const myRoleLower = (user?.role || '').toLowerCase();
-                         const isPimpinanU = uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                         const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
                          
                          if (myRoleLower.includes('kasi') || myRoleLower.includes('kasubag') || myRoleLower.includes('kabag')) {
                              if (!uRoleLower.includes('pelaksana') && !uRoleLower.includes('staf')) return false;

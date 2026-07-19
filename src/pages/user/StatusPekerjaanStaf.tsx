@@ -1,13 +1,27 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Users, Search, Filter } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, isStaffRole, isSubordinate, isManagerRole } from '../../lib/utils';
 
 export default function StatusPekerjaanStaf() {
   const { tasks, user, usersList } = useAppContext();
 
   // Find users managed by this person, or in the same OPD ideally. For now, we'll just show all active tasks assigned to Staf and Kasi if Admin/Camat
-  const staffTasks = tasks.filter(t => t.assignedTo && t.assignedTo !== user?.name && t.assignedTo !== user?.username);
+  const staffTasks = tasks.filter(t => {
+     if (!t.assignedTo || t.assignedTo === user?.name || t.assignedTo === user?.username) return false;
+     if (user?.role === 'admin' || user?.role?.includes('camat')) return true;
+     
+     const assignedUser = usersList.find(u => u.name === t.assignedTo || u.username === t.assignedTo);
+     if (!assignedUser) return false;
+     if (user?.opd && assignedUser.opd !== user.opd) return false;
+     
+     if (user && isManagerRole(user.role)) {
+         if (!isStaffRole(assignedUser.role)) return false;
+         return isSubordinate(user, assignedUser);
+     }
+     
+     return true;
+  });
 
   return (
     <div className="space-y-6 lg:px-4 pb-12">

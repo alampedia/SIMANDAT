@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../../context/AppContext';
 import { Inbox, CheckCircle2, Clock, CheckSquare, Send, X, ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, isStaffRole, isManagerRole, isSubordinate } from '../../lib/utils';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
@@ -22,8 +22,8 @@ export default function DisposisiMasuk() {
   return (
     <div className="space-y-6 lg:px-4 pb-12">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Disposisi Masuk</h1>
-        <p className="text-gray-500 text-sm mt-1">Daftar naskah dan tugas dari pimpinan yang tertuju pada Anda.</p>
+        <h1 className="text-2xl font-bold text-gray-900">Kotak Tugas & Mapping</h1>
+        <p className="text-gray-500 text-sm mt-1">Daftar tugas yang perlu diselesaikan atau dipetakan ke pelaksana.</p>
       </header>
 
       <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
@@ -132,17 +132,13 @@ export default function DisposisiMasuk() {
                     >
                       <option value="" disabled>-- Pilih Staf --</option>
                       {usersList.filter(u => {
-                         const uRoleLower = (u.role || '').toLowerCase();
-                         if (!uRoleLower.includes('pelaksana') && !uRoleLower.includes('staf')) return false;
+                         if (!isStaffRole(u.role)) return false;
                          
-                         const myTitleWords = (user?.title || '').toLowerCase().replace(/kepala|seksi|sub|bag|bagian|&/g, '').trim().split(/\s+/);
-                         const uTitleLower = (u.title || '').toLowerCase();
-                         const hasMatch = myTitleWords.some(word => word.length > 3 && uTitleLower.includes(word));
-                         
-                         if (myTitleWords.length > 0 && myTitleWords.some(w => w.length > 3)) {
-                             if (!hasMatch) return false;
+                         if (user && isManagerRole(user.role)) {
+                             if (!isSubordinate(user, u)) return false;
                          }
-                         return !user?.opd || u.opd === user?.opd;
+                         
+                         const uOpd = (u.opd || '').toLowerCase(); const mOpd = (user?.opd || '').toLowerCase(); return !mOpd || uOpd === mOpd || uOpd.includes(mOpd) || mOpd.includes(uOpd);
                       }).map(u => (
                         <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
                       ))}

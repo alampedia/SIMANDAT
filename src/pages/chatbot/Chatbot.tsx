@@ -11,7 +11,7 @@ export default function Chatbot() {
 
   const role = user?.role || 'staf_pelaksana';
   const roleLower = role.toLowerCase();
-  const isLeader = roleLower.includes('camat') || roleLower.includes('sekcam') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isLeader = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('sekcam') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
 
   const handleSendFonnte = async (e: React.FormEvent) => {
     e.preventDefault();

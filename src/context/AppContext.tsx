@@ -12,6 +12,7 @@ export interface User {
   title: string;
   tupoksi?: string;
   tugasSehariHari?: string;
+  unitOrganisasi?: string;
   opd?: string;
 }
 
@@ -161,6 +162,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               title: p.jabatan,
               tupoksi: p.tupoksi,
               tugasSehariHari: p.tugas_sehari_hari,
+              unitOrganisasi: p.unit_organisasi,
               opd: p.opd
             }));
             setDbUsers(mappedUsers);
@@ -258,6 +260,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             title: userData.jabatan || 'Pengguna',
             tupoksi: userData.tupoksi,
             tugasSehariHari: userData.tugas_sehari_hari,
+            unitOrganisasi: userData.unit_organisasi,
             opd: userData.opd
           };
           setUser(userObj);
@@ -395,7 +398,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     const addTask = async (task: Omit<DisposisiTask, 'id' | 'history'>) => {
     const id = `ND-${new Date().getTime().toString().slice(-4)}`;
-    const historyUpdate = { date: new Date().toISOString(), action: 'Naskah dibuat dan diteruskan ke Reviewer', actor: user?.name || 'Sistem' };
+    const historyUpdate = { date: new Date().toISOString(), action: task.status === 'pending_camat' ? 'Naskah dibuat dan diteruskan ke Pimpinan' : 'Naskah dibuat dan diteruskan ke Reviewer', actor: user?.name || 'Sistem' };
     
     // Default fallback locally
     setTasks(prev => [{ id, ...task, history: [historyUpdate] }, ...prev]);
@@ -404,7 +407,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (config.waApiKey && user) {
        let targetRoles = [];
        if (task.status === 'pending_sekcam' || !task.status) {
-           targetRoles = ['sekcam', 'wakapolsek', 'wadanramil', 'kasdim', 'kasat'];
+           targetRoles = ['sekcam', 'sekretaris', 'wakapolsek', 'wadanramil', 'kasdim', 'kasat'];
        } else if (task.status === 'pending_camat') {
            targetRoles = ['camat', 'kapolsek', 'danramil'];
        }
@@ -412,7 +415,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
        if (targetRoles.length > 0) {
            const targets = dbUsers.filter(u => {
                const uRoleLower = (u.role || '').toLowerCase();
-               return targetRoles.some(r => uRoleLower.includes(r)) && (!u.opd || u.opd === (task.opd || user.opd) || (user?.role || '').toLowerCase() === 'admin');
+               return targetRoles.some(r => uRoleLower.includes(r) && (r !== 'camat' || (!uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')))) && (!u.opd || u.opd === (task.opd || user.opd) || (user?.role || '').toLowerCase() === 'admin');
            });
            
            for (const target of targets) {
@@ -546,7 +549,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (newStatus === 'pending_camat' && config.waApiKey && user) {
        const camats = dbUsers.filter(u => {
            const uRoleLower = (u.role || '').toLowerCase();
-           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
+           return ((uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
        });
        for (const camat of camats) {
           if (camat.phone) {
@@ -560,7 +563,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
        // Send feedback to Atasan (e.g. Camat, Kapolsek or Sekcam) in the same OPD
        const atasans = dbUsers.filter(u => {
            const uRoleLower = (u.role || '').toLowerCase();
-           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil') || uRoleLower.includes('sekcam')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
+           return ((uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil') || uRoleLower.includes('sekcam')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
        });
        for (const atasan of atasans) {
           if (atasan.phone) {

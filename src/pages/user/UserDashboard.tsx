@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext';
 import { Send, TrendingDown, TrendingUp, Minus, ClipboardList, CheckCircle2, FileText, Inbox, Clock, CheckCircle, AlertTriangle, PieChart as PieChartIcon, Users, FileCheck2, ChevronDown } from 'lucide-react';
-import { cn } from '../../lib/utils';
+import { cn, isStaffRole, isSubordinate, isManagerRole } from '../../lib/utils';
 import { format } from 'date-fns';
 import { id as localeId } from 'date-fns/locale';
 
@@ -86,17 +86,18 @@ export default function UserDashboard() {
 
   const role = user?.role || 'staf_pelaksana';
   const roleLower = role.toLowerCase();
-  const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
-  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
+  const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
   const isPimpinan = isPimpinanPuncak || isReviewer || role === 'admin';
-  const isManager = role === 'kasi' || role === 'kabag' || role === 'kasubag';
-  const staffRoles = ['pelaksana', 'staf_pelaksana', 'staf_agenda', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'];
-  const isStaf = staffRoles.includes(role);
+  const isManager = isManagerRole(role);
+  const isStaf = isStaffRole(role) || role === 'staf_agenda';
   
   // Tasks assigned to downline staff (for Manager view)
   const staffTasks = tasks.filter(t => {
      const assignedUser = usersList.find(u => u.name === t.assignedTo || u.username === t.assignedTo);
-     return assignedUser && staffRoles.includes(assignedUser.role);
+     if (!assignedUser || !isStaffRole(assignedUser.role)) return false;
+     if (user && isManagerRole(user.role) && !isSubordinate(user, assignedUser)) return false;
+     const uOpd = (assignedUser.opd || '').toLowerCase(); const mOpd = (user?.opd || '').toLowerCase(); return !mOpd || uOpd === mOpd || uOpd.includes(mOpd) || mOpd.includes(uOpd);
   });
 
 
@@ -393,13 +394,22 @@ export default function UserDashboard() {
                              <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 75)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">75%</button>
                           </div>
                           <button 
-                            onClick={() => setFeedbackTaskId(task.id)}
+                             onClick={() => setFeedbackTaskId(task.id)}
                             className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95 group-hover:-translate-y-0.5"
                             style={{ backgroundColor: config.primaryColor }}
                           >
                             <CheckCircle2 size={14} /> 
                             Selesaikan
                           </button>
+                          {isManager && (
+                            <Link
+                              to="/disposisi-masuk"
+                              className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-indigo-600 px-4 py-2 rounded-xl shadow-sm hover:bg-indigo-700 transition-all active:scale-95 mt-0 md:mt-2"
+                            >
+                              <Send size={14} /> 
+                              Mapping Bawahan
+                            </Link>
+                          )}
                         </div>
                     </div>
                   ))}

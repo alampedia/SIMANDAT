@@ -107,7 +107,7 @@ export default function AdminLayout() {
 
         <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
-            if (item.adminOnly && user?.role !== 'admin') return null;
+            
             return (
               <NavLink
                 key={item.path}
