@@ -514,7 +514,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateTaskStatus = async (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string, disposisiType?: 'reguler' | 'akhir') => {
     let actionMsg = `Status diubah ke ${newStatus}`;
     if (newStatus === 'pending_camat') actionMsg = `Diteruskan ke Pimpinan (Mapping oleh Reviewer)`;
-    if (newStatus === 'pending_target') actionMsg = `Disetujui Pimpinan dan diteruskan ke Target`;
+    if (newStatus === 'pending_target') {
+       const currentTaskCheck = tasks.find(t => t.id === taskId);
+       if (currentTaskCheck && currentTaskCheck.status === 'pending_target') {
+           actionMsg = `Diteruskan ke Staf Pelaksana oleh Atasan`;
+       } else {
+           actionMsg = `Disetujui Pimpinan dan diteruskan ke Target`;
+       }
+    }
     if (newStatus === 'in_progress') actionMsg = `Progres diperbarui${progress !== undefined ? ` (${progress}%)` : ''}`;
     
     const historyUpdate = { date: new Date().toISOString(), action: `${actionMsg}${note ? ' - Catatan: '+note : ''}`, actor: user?.name || 'Sistem' };
@@ -529,7 +536,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       if (targetUserAlias) {
         const targetUser = dbUsers.find(u => u.name === targetUserAlias || u.username === targetUserAlias);
         if (targetUser && targetUser.phone) {
-           const waMsg = `*SIMANDAT - TUGAS BARU*\n\nHalo *${targetUser.name}*,\nAnda mendapat disposisi baru dari pimpinan.\n\n*Dokumen:* ${currentTask.title}\n*Instruksi Pimpinan:* ${note || currentTask.instructions || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk menindaklanjuti atau update progres. Terima kasih.`;
+           const senderName = user?.name || 'Pimpinan/Atasan';
+           const waMsg = `*SIMANDAT - TUGAS BARU*\n\nHalo *${targetUser.name}*,\nAnda mendapat disposisi tugas baru dari *${senderName}*.\n\n*Dokumen:* ${currentTask.title}\n*Instruksi:* ${note || currentTask.instructions || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk menindaklanjuti atau update progres. Terima kasih.`;
            import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, targetUser.phone, waMsg));
         }
       }
