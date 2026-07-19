@@ -8,7 +8,7 @@ export default function PageDisposisi() {
   const { user, tasks, usersList, addNotification, config, updateTaskStatus } = useAppContext();
   
   const roleLower = (user?.role || '').toLowerCase();
-  const isPimpinan = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isPimpinan = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris'));
   const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
 
   // Ambil surat yang perlu disposisi sesuai role
@@ -23,6 +23,7 @@ export default function PageDisposisi() {
 
   const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
   
+  const [targetTab, setTargetTab] = useState<'pegawai' | 'kapolsek' | 'danramil'>('pegawai');
   const [disposisiForm, setDisposisiForm] = useState({
     instruksi: 'Tindaklanjuti',
     catatanKhusus: '',
@@ -162,6 +163,31 @@ export default function PageDisposisi() {
                
                <div>
                  <label className="block text-sm font-bold text-gray-700 mb-2">Target Pejabat / Staf</label>
+                 {isReviewer ? (
+                   <div className="mb-3 flex rounded-xl bg-gray-100 p-1">
+                     <button
+                       type="button"
+                       onClick={() => { setTargetTab('pegawai'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'pegawai' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                     >
+                       Pegawai Kecamatan
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => { setTargetTab('kapolsek'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'kapolsek' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                     >
+                       Kapolsek
+                     </button>
+                     <button
+                       type="button"
+                       onClick={() => { setTargetTab('danramil'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'danramil' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                     >
+                       Danramil
+                     </button>
+                   </div>
+                 ) : null}
                  <div className="relative">
                    <select 
                       required={isReviewer || !selectedTask.assignedTo}
@@ -172,9 +198,21 @@ export default function PageDisposisi() {
                    >
                       <option value="" disabled>-- Pilih Pejabat / Staf Tujuan --</option>
                       {usersList.filter(u => {
+                         if (u.role === 'admin') return false;
                          const uRoleLower = (u.role || '').toLowerCase();
-                         const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
-                         return u.role !== 'admin' && !isPimpinanU && (!user?.opd || u.opd === user?.opd);
+                         
+                         if (isReviewer) {
+                             if (targetTab === 'kapolsek') return uRoleLower.includes('kapolsek');
+                             if (targetTab === 'danramil') return uRoleLower.includes('danramil');
+                             // Pegawai Kecamatan
+                             const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris'));
+                             const isLuarKecamatan = uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                             return !isPimpinanU && !isLuarKecamatan && (!user?.opd || u.opd === user?.opd);
+                         } else {
+                             const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris'));
+                             const isLuarKecamatan = uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                             return !isPimpinanU && !isLuarKecamatan && (!user?.opd || u.opd === user?.opd);
+                         }
                       }).map(u => (
                          <option key={u.id} value={u.name}>
                             {u.name} ({u.title})

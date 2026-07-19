@@ -16,7 +16,7 @@ export default function CetakLaporan() {
      
      const role = user.role;
      const roleLower = role.toLowerCase();
-     const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+     const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris'));
      const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
      const isAdminOrReviewer = role === 'admin' || isReviewer;
      

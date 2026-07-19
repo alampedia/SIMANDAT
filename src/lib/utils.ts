@@ -12,7 +12,7 @@ export function isStaffRole(role: string): boolean {
 
 export function isManagerRole(role: string): boolean {
     const r = (role || '').toLowerCase();
-    return r.includes('kasi') || r.includes('kasubag') || r.includes('kabag') || r.includes('kanit');
+    return r.includes('kasi') || r.includes('kasubag') || r.includes('kabag') || r.includes('kanit') || r.includes('kapolsek') || r.includes('danramil');
 }
 
 export function isSubordinate(manager: { title?: string, role?: string, unitOrganisasi?: string }, staff: { title?: string, role?: string, unitOrganisasi?: string }): boolean {

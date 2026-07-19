@@ -144,7 +144,7 @@ export default function MobileMenu() {
          mappedRole = 'admin';
      } else if (['pelaksana', 'sertu', 'serma', 'praka', 'serda', 'serka', 'aipda', 'aiptu', 'bripka', 'briptu'].some(r => userRole.includes(r)) || userRole.includes('staf')) {
          mappedRole = 'staf_pelaksana';
-     } else if (userRole.includes('kasi')) {
+     } else if (userRole.includes('kasi') || userRole.includes('kapolsek') || userRole.includes('danramil')) {
          mappedRole = 'kasi';
      } else if (userRole.includes('kasubag')) {
          mappedRole = 'kasubag';
@@ -152,7 +152,7 @@ export default function MobileMenu() {
          mappedRole = 'kabag';
      } else if (userRole.includes('sekcam') || userRole.includes('wakapolsek') || userRole.includes('wadanramil') || userRole.includes('kasdim') || userRole.includes('kasat')) {
          mappedRole = 'sekcam';
-     } else if (userRole.includes('danramil') || userRole.includes('kapolsek') || (userRole.includes('camat') && !userRole.includes('sekcam') && !userRole.includes('sekretaris'))) {
+     } else if (userRole.includes('camat') && !userRole.includes('sekcam') && !userRole.includes('sekretaris')) {
          mappedRole = 'camat';
      }
      

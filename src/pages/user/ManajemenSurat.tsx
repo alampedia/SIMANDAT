@@ -12,7 +12,7 @@ export default function ManajemenSurat() {
   const [activeTab, setActiveTab] = useState<'masuk' | 'keluar' | 'arsip'>('masuk');
   
   const roleLower = (user?.role || '').toLowerCase();
-  const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris')) || roleLower.includes('kapolsek') || roleLower.includes('danramil');
+  const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris'));
   const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
 
   const filteredDocs = tasks.filter(doc => (doc.type || 'masuk') === activeTab);
@@ -422,7 +422,7 @@ export default function ManajemenSurat() {
                          if (u.role === 'admin') return false;
                          const uRoleLower = (u.role || '').toLowerCase();
                          const myRoleLower = (user?.role || '').toLowerCase();
-                         const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris')) || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
+                         const isPimpinanU = (uRoleLower.includes('camat') && !uRoleLower.includes('sekcam') && !uRoleLower.includes('sekretaris'));
                          
                          if (myRoleLower.includes('kasi') || myRoleLower.includes('kasubag') || myRoleLower.includes('kabag')) {
                              if (!uRoleLower.includes('pelaksana') && !uRoleLower.includes('staf')) return false;
