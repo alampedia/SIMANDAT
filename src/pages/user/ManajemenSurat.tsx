@@ -15,7 +15,7 @@ export default function ManajemenSurat() {
   const isPimpinanPuncak = roleLower.includes('camat') || roleLower.includes('kapolsek') || roleLower.includes('danramil');
   const isReviewer = roleLower.includes('sekcam') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat') || roleLower === 'admin';
 
-  const filteredDocs = tasks.filter(doc => activeTab === 'masuk' ? true : false); // simplifies logic to show all in masuk for now
+  const filteredDocs = tasks.filter(doc => (doc.type || 'masuk') === activeTab);
 
   // Modal States
   const [isNewDocOpen, setIsNewDocOpen] = useState(false);
@@ -66,25 +66,14 @@ export default function ManajemenSurat() {
 
   // Disposisi Form State
   const [disposisiForm, setDisposisiForm] = useState({
-    instruksi: 'Tindaklanjuti', catatan: '', tujuan: '', deadline: ''
+    instruksi: 'Tindaklanjuti', catatan: '', tujuan: '', deadline: '', disposisiType: 'reguler'
   });
 
   const handleCreateDoc = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newDoc.title) return;
     
-    const targetUser = usersList.find(u => u.name === newDoc.assignedTo);
-    let newStatus = 'pending_sekcam';
-    if (targetUser) {
-        const uRole = targetUser.role.toLowerCase();
-        if (uRole.includes('sekcam') || uRole.includes('wakapolsek') || uRole.includes('wadanramil') || uRole.includes('kasdim') || uRole.includes('kasat')) {
-            newStatus = 'pending_sekcam';
-        } else if (uRole.includes('camat') || uRole.includes('kapolsek') || uRole.includes('danramil')) {
-            newStatus = 'pending_camat';
-        } else {
-            newStatus = 'pending_target';
-        }
-    }
+    let newStatus = 'pending_sekcam'; // Selalu ke sekcam dulu untuk verifikasi
 
     // Add task to global state
     addTask({
@@ -95,11 +84,12 @@ export default function ManajemenSurat() {
       status: newStatus as any,
       priority: newDoc.priority,
       driveUrl: newDoc.driveUrl,
+      type: newDoc.type as any,
       assignedTo: newDoc.assignedTo,
       progress: 0
     });
 
-    // The notification is handled in addTask mostly, but we can keep UI updates
+       addNotification('Surat berhasil disimpan dan diteruskan ke Sekcam untuk tindak lanjut.');
     setIsNewDocOpen(false);
     setNewDoc({ nomorSurat: '', title: '', sender: '', type: 'masuk', priority: 'Biasa', driveUrl: '', assignedTo: '' });
   };
@@ -112,18 +102,17 @@ export default function ManajemenSurat() {
     let newStatus: any = 'pending_camat';
     if (isReviewer) {
         newStatus = 'pending_camat';
-        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
+        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline, disposisiForm.disposisiType as any);
     } else if (isPimpinanPuncak) {
         newStatus = 'pending_target';
-        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
+        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline, disposisiForm.disposisiType as any);
     } else {
         newStatus = 'in_progress';
-        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline);
+        updateTaskStatus(disposisiDoc.id, newStatus, disposisiForm.catatan, disposisiForm.tujuan, undefined, disposisiForm.deadline, disposisiForm.disposisiType as any);
     }
-
     addNotification(`Surat berhasil didisposisikan ke ${disposisiForm.tujuan}.`);
     setDisposisiDoc(null);
-    setDisposisiForm({ instruksi: 'Tindaklanjuti', catatan: '', tujuan: '', deadline: '' });
+    setDisposisiForm({ instruksi: 'Tindaklanjuti', catatan: '', tujuan: '', deadline: '', disposisiType: 'reguler' });
   };
 
   return (
@@ -135,7 +124,7 @@ export default function ManajemenSurat() {
         </div>
         {(user?.role === 'admin' || user?.role === 'staf_agenda') && (
            <button 
-             onClick={() => setIsNewDocOpen(true)}
+             onClick={() => { setIsNewDocOpen(true); setNewDoc(prev => ({...prev, type: activeTab as any})); }}
              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm flex items-center gap-2"
            >
              <Plus size={18} /> <span className="hidden sm:inline">Naskah Baru</span>
@@ -214,7 +203,7 @@ export default function ManajemenSurat() {
                      <div className="flex w-full sm:w-auto gap-2">
                         {((doc.status === 'pending_sekcam' && isReviewer) || (doc.status === 'pending_camat' && isPimpinanPuncak)) && (
                           <button 
-                            onClick={() => setDisposisiDoc(doc)}
+                            onClick={() => { setDisposisiDoc(doc); setDisposisiForm(prev => ({...prev, tujuan: doc.assignedTo || '', catatan: doc.notesSekcam || ''})); }}
                             className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold shadow-sm hover:shadow-md hover:bg-blue-700 active:scale-95 transition-all"
                           >
                              <Send size={14} />
@@ -309,62 +298,36 @@ export default function ManajemenSurat() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-bold text-gray-700 mb-1">Tipe Naskah</label>
-                    <select 
-                      value={newDoc.type}
-                      onChange={e => setNewDoc({...newDoc, type: e.target.value})}
-                      className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
-                    >
-                      <option value="masuk">Surat Masuk</option>
-                      <option value="keluar">Surat Keluar</option>
-                    </select>
+                    <div className="relative">
+                      <select 
+                        value={newDoc.type}
+                        onChange={e => setNewDoc({...newDoc, type: e.target.value as any})}
+                        className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      >
+                        <option value="masuk">Masuk</option>
+                        <option value="keluar">Keluar</option>
+                        <option value="arsip">Arsip</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
+                    </div>
                   </div>
                   <div>
-                    <label className="block text-xs font-bold text-gray-700 mb-1">Derajat Keamanan / Prioritas</label>
-                    <select 
-                      value={newDoc.priority}
-                      onChange={e => setNewDoc({...newDoc, priority: e.target.value})}
-                      className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
-                    >
-                      <option value="Biasa">Biasa</option>
-                      <option value="Segera">Segera</option>
-                      <option value="Mendesak">Mendesak</option>
-                      <option value="Sangat Rahasia">Sangat Rahasia</option>
-                    </select>
+                    <label className="block text-xs font-bold text-gray-700 mb-1">Tujuan / Kepada (Opsional)</label>
+                    <div className="relative">
+                      <select 
+                        value={newDoc.assignedTo}
+                        onChange={e => setNewDoc({...newDoc, assignedTo: e.target.value})}
+                        className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      >
+                        <option value="">-- Pilih --</option>
+                        {usersList.map(u => (
+                          <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
+                    </div>
                   </div>
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">URL dari Drive (Bersifat Opsional)</label>
-                  <input
-                    type="url"
-                    value={newDoc.driveUrl}
-                    onChange={e => setNewDoc({...newDoc, driveUrl: e.target.value})}
-                    placeholder="https://drive.google.com/..."
-                    className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
-                    style={{ '--tw-ring-color': config.primaryColor } as any}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Target / Arah Surat</label>
-                  <div className="relative">
-                    <select 
-                      value={newDoc.assignedTo}
-                      onChange={e => setNewDoc({...newDoc, assignedTo: e.target.value})}
-                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
-                      style={{ '--tw-ring-color': config.primaryColor } as any}
-                    >
-                      <option value="" disabled>-- Pilih Target Pejabat --</option>
-                      {usersList.filter(u => {
-                         return u.role !== 'admin' && (!user?.opd || u.opd === user?.opd);
-                      }).map(u => (
-                         <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
-                  </div>
-                </div>
-
               </form>
             </div>
             
@@ -381,67 +344,35 @@ export default function ManajemenSurat() {
                 className="px-6 py-2 text-sm font-bold text-white rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95"
                 style={{ backgroundColor: config.primaryColor }}
               >
-                Simpan Arsip
+                Simpan Naskah
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL: DISPOSISI/TINDAK LANJUT */}
+      {/* Disposisi Modal */}
       {disposisiDoc && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl shadow-xl w-full max-w-xl overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-gray-50/50">
-              <h2 className="font-bold text-gray-900 text-lg flex items-center gap-2">
-                <Send size={18} className="text-blue-600" /> Lembar Disposisi / Tindak Lanjut
-              </h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDisposisiDoc(null)}></div>
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+              <h2 className="font-bold text-gray-900 text-lg">Tindak Lanjut / Disposisi</h2>
               <button onClick={() => setDisposisiDoc(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 -mr-2">
                 <X size={20} />
               </button>
             </div>
             
-            <div className="p-6 overflow-y-auto flex-1">
-              <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-5">
-                <span className="text-[10px] uppercase font-bold text-blue-500 tracking-wider">Identitas Naskah</span>
-                <h3 className="font-bold text-gray-900 mt-1">{disposisiDoc.title}</h3>
-                <p className="text-xs text-gray-600">Pengirim: {disposisiDoc.sender}</p>
+            <div className="p-6 overflow-y-auto">
+              <div className="mb-4 bg-blue-50/50 p-4 rounded-2xl border border-blue-100">
+                <p className="text-xs font-bold text-blue-800 uppercase tracking-wide mb-1">Dokumen</p>
+                <p className="font-medium text-gray-900">{disposisiDoc.title}</p>
+                <p className="text-sm text-gray-500 mt-0.5">Dari: {disposisiDoc.sender}</p>
               </div>
 
               <form id="form-disposisi" onSubmit={handleDisposisi} className="space-y-4">
                 <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Pilihan Instruksi / Tindak Lanjut</label>
-                  <div className="relative">
-                    <select 
-                      value={disposisiForm.instruksi}
-                      onChange={e => setDisposisiForm({...disposisiForm, instruksi: e.target.value})}
-                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
-                    >
-                       <option value="Tindaklanjuti">Tindaklanjuti</option>
-                       <option value="Tanggapan & Saran">Tanggapan & Saran</option>
-                       <option value="Untuk Diketahui / Dipedomani">Untuk Diketahui / Dipedomani</option>
-                       <option value="Hadiri">Hadiri</option>
-                       <option value="Wakili">Wakili</option>
-                       <option value="Selesaikan / Buat Laporan">Selesaikan / Buat Laporan</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Catatan Arahan Khusus</label>
-                  <textarea 
-                    rows={3}
-                    value={disposisiForm.catatan}
-                    onChange={e => setDisposisiForm({...disposisiForm, catatan: e.target.value})}
-                    placeholder="Contoh: Segera pelajari dan buat draft laporan kepada Pimpinan..."
-                    className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all resize-none"
-                    style={{ '--tw-ring-color': config.primaryColor } as any}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-gray-700 mb-1">Diteruskan Kepada (Tujuan)</label>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Tujuan Disposisi / Mapping Target</label>
                   <div className="relative">
                     <select 
                       required
@@ -451,15 +382,58 @@ export default function ManajemenSurat() {
                     >
                       <option value="" disabled>-- Pilih Pejabat / Staf --</option>
                       {usersList.filter(u => {
+                         if (u.role === 'admin') return false;
                          const uRoleLower = (u.role || '').toLowerCase();
+                         const myRoleLower = (user?.role || '').toLowerCase();
                          const isPimpinanU = uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil');
-                         return u.role !== 'admin' && !isPimpinanU && (!user?.opd || u.opd === user?.opd);
+                         
+                         if (myRoleLower.includes('kasi') || myRoleLower.includes('kasubag') || myRoleLower.includes('kabag')) {
+                             if (!uRoleLower.includes('pelaksana') && !uRoleLower.includes('staf')) return false;
+                             const myTitleWords = (user?.title || '').toLowerCase().replace(/kepala|seksi|sub|bag|bagian|&/g, '').trim().split(/\s+/);
+                             const uTitleLower = (u.title || '').toLowerCase();
+                             const hasMatch = myTitleWords.some(word => word.length > 3 && uTitleLower.includes(word));
+                             if (myTitleWords.length > 0 && myTitleWords.some(w => w.length > 3)) {
+                                 if (!hasMatch) return false;
+                             }
+                             return true;
+                         }
+                         return !isPimpinanU && (!user?.opd || u.opd === user?.opd);
                       }).map(u => (
                         <option key={u.id} value={u.name}>{u.name} ({u.title})</option>
                       ))}
                     </select>
                     <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
                   </div>
+                </div>
+
+                {/* Tipe Disposisi */}
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Tipe Mapping Tugas</label>
+                  <div className="relative">
+                    <select 
+                      required
+                      value={disposisiForm.disposisiType}
+                      onChange={e => setDisposisiForm({...disposisiForm, disposisiType: e.target.value as any})}
+                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                    >
+                      <option value="reguler">Tugas Reguler (Dapat Dimapping Lanjut)</option>
+                      <option value="akhir">Tugas Akhir (Harus Dikerjakan Target)</option>
+                    </select>
+                    <ChevronDown className="absolute right-4 top-3 text-gray-400 pointer-events-none" size={16} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-gray-700 mb-1">Catatan Arahan Khusus</label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={disposisiForm.catatan}
+                    onChange={e => setDisposisiForm({...disposisiForm, catatan: e.target.value})}
+                    placeholder="Contoh: Tolong siapkan draft bahan tayang rapat ini segera."
+                    className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all resize-none"
+                    style={{ '--tw-ring-color': config.primaryColor } as any}
+                  />
                 </div>
                 
                 <div>
@@ -494,8 +468,7 @@ export default function ManajemenSurat() {
           </div>
         </div>
       )}
-    
-      {/* Detail Document Modal */}
+{/* Detail Document Modal */}
       {detailDoc && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDetailDoc(null)}></div>

@@ -38,6 +38,8 @@ export interface DisposisiTask {
   priority?: string;
   driveUrl?: string;
   assignedTo?: string; // final target
+  type?: 'masuk' | 'keluar' | 'arsip';
+  disposisiType?: 'reguler' | 'akhir';
   instructions?: string;
   notesCamat?: string;
   notesSekcam?: string;
@@ -365,6 +367,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             title: t.title,
             sender: t.sender,
             date: t.date,
+            type: t.type || 'masuk',
+            disposisiType: t.disposisi_type,
             status: t.status,
             priority: t.priority,
             driveUrl: t.drive_url,
@@ -389,12 +393,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     refreshTasks();
   }, [config.supabaseUrl, config.supabaseKey]);
 
-  const addTask = async (task: Omit<DisposisiTask, 'id' | 'history'>) => {
+    const addTask = async (task: Omit<DisposisiTask, 'id' | 'history'>) => {
     const id = `ND-${new Date().getTime().toString().slice(-4)}`;
     const historyUpdate = { date: new Date().toISOString(), action: 'Naskah dibuat dan diteruskan ke Reviewer', actor: user?.name || 'Sistem' };
     
     // Default fallback locally
     setTasks(prev => [{ id, ...task, history: [historyUpdate] }, ...prev]);
+    
+    // ----- WHATSAPP FONNTE LOGIC -----
+    if (config.waApiKey && user) {
+       let targetRoles = [];
+       if (task.status === 'pending_sekcam' || !task.status) {
+           targetRoles = ['sekcam', 'wakapolsek', 'wadanramil', 'kasdim', 'kasat'];
+       } else if (task.status === 'pending_camat') {
+           targetRoles = ['camat', 'kapolsek', 'danramil'];
+       }
+       
+       if (targetRoles.length > 0) {
+           const targets = dbUsers.filter(u => {
+               const uRoleLower = (u.role || '').toLowerCase();
+               return targetRoles.some(r => uRoleLower.includes(r)) && (!u.opd || u.opd === (task.opd || user.opd) || (user?.role || '').toLowerCase() === 'admin');
+           });
+           
+           for (const target of targets) {
+              if (target.phone) {
+                 const waMsg = `*SIMANDAT - NASKAH MASUK*\n\nHalo *${target.name}*,\n\nAda naskah dinas baru yang perlu direview/didisposisikan:\n*Nomor Surat:* ${task.nomorSurat || '-'}\n*Dokumen:* ${task.title}\n*Pengirim:* ${task.sender}\n\nSilakan cek aplikasi SIMANDAT.`;
+                 import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, target.phone, waMsg));
+              }
+           }
+       } else if (task.status === 'pending_target' && task.assignedTo) {
+           const targetUser = dbUsers.find(u => u.name === task.assignedTo || u.username === task.assignedTo);
+           if (targetUser && targetUser.phone) {
+               const waMsg = `*SIMANDAT - TUGAS BARU*\n\nHalo *${targetUser.name}*,\nAnda mendapat disposisi langsung dari pimpinan.\n\n*Dokumen:* ${task.title}\n*Instruksi Pimpinan:* ${task.instructions || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk menindaklanjuti atau update progres. Terima kasih.`;
+               import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, targetUser.phone, waMsg));
+           }
+       }
+    }
+    // ---------------------------------
+
 
     if (config.supabaseUrl && config.supabaseKey) {
       try {
@@ -407,6 +443,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           title: task.title,
           sender: task.sender,
           date: task.date,
+          type: task.type || 'masuk',
+          disposisi_type: task.disposisiType,
           status: task.status || 'pending_sekcam',
           priority: task.priority,
           drive_url: task.driveUrl,
@@ -473,7 +511,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
-  const updateTaskStatus = async (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string) => {
+  const updateTaskStatus = async (taskId: string, newStatus: DisposisiTask['status'], note?: string, assignedTo?: string, progress?: number, deadline?: string, disposisiType?: 'reguler' | 'akhir') => {
     let actionMsg = `Status diubah ke ${newStatus}`;
     if (newStatus === 'pending_camat') actionMsg = `Diteruskan ke Pimpinan (Mapping oleh Reviewer)`;
     if (newStatus === 'pending_target') actionMsg = `Disetujui Pimpinan dan diteruskan ke Target`;
@@ -485,23 +523,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const currentTask = tasks.find(t => t.id === taskId);
     if (!currentTask) return;
 
-    // ----- WHATSAPP FONNTE LOGIC -----
+        // ----- WHATSAPP FONNTE LOGIC -----
     if (newStatus === 'pending_target' && config.waApiKey) {
       const targetUserAlias = assignedTo || currentTask.assignedTo;
       if (targetUserAlias) {
         const targetUser = dbUsers.find(u => u.name === targetUserAlias || u.username === targetUserAlias);
         if (targetUser && targetUser.phone) {
            const waMsg = `*SIMANDAT - TUGAS BARU*\n\nHalo *${targetUser.name}*,\nAnda mendapat disposisi baru dari pimpinan.\n\n*Dokumen:* ${currentTask.title}\n*Instruksi Pimpinan:* ${note || currentTask.instructions || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk menindaklanjuti atau update progres. Terima kasih.`;
-           import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, targetUser.phone!, waMsg));
+           import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, targetUser.phone, waMsg));
         }
       }
     }
     
+    if (newStatus === 'pending_camat' && config.waApiKey && user) {
+       const camats = dbUsers.filter(u => {
+           const uRoleLower = (u.role || '').toLowerCase();
+           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
+       });
+       for (const camat of camats) {
+          if (camat.phone) {
+             const waMsg = `*SIMANDAT - PERSETUJUAN DISPOSISI*\n\nHalo *${camat.name}*,\n\nAda naskah dinas masuk yang memerlukan persetujuan disposisi dari Anda:\n*Dokumen:* ${currentTask.title}\n*Catatan Reviewer:* ${note || '-'}\n\nSilakan cek aplikasi SIMANDAT untuk meneruskan disposisi.`;
+             import('../lib/fonnte').then(m => m.sendFonnteMessage(config.waApiKey, camat.phone, waMsg));
+          }
+       }
+    }
+
     if (newStatus === 'completed' && config.waApiKey && user) {
        // Send feedback to Atasan (e.g. Camat, Kapolsek or Sekcam) in the same OPD
        const atasans = dbUsers.filter(u => {
            const uRoleLower = (u.role || '').toLowerCase();
-           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil') || uRoleLower.includes('sekcam')) && (!u.opd || u.opd === user.opd);
+           return (uRoleLower.includes('camat') || uRoleLower.includes('kapolsek') || uRoleLower.includes('danramil') || uRoleLower.includes('sekcam')) && (!u.opd || u.opd === user.opd || (user?.role || '').toLowerCase() === 'admin');
        });
        for (const atasan of atasans) {
           if (atasan.phone) {
@@ -523,7 +574,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
            ...(note && newStatus === 'pending_target' ? { notesCamat: note } : {}),
            ...(deadline ? { deadline } : {}),
            history: [...t.history, historyUpdate],
-           ...(assignedTo ? { assignedTo } : {})
+           ...(assignedTo ? { assignedTo } : {}),
+           ...(disposisiType ? { disposisiType } : {})
         };
       }
       return t;
@@ -544,6 +596,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (note && newStatus === 'pending_target') updatePayload.notes_camat = note;
         if (deadline) updatePayload.deadline = deadline;
         if (assignedTo) updatePayload.assigned_to = assignedTo;
+        if (disposisiType) updatePayload.disposisi_type = disposisiType;
 
         const { error } = await supabase.from('app_tasks').update(updatePayload).eq('id', taskId);
 
