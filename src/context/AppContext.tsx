@@ -612,6 +612,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         const { error } = await supabase.from('app_tasks').update(updatePayload).eq('id', taskId);
 
         if (error) throw error;
+
+        // Auto insert to kinerja_harian for dispositions and progress updates
+        if (user?.username) {
+           await supabase.from('kinerja_harian').insert([{
+              nip: user.username,
+              aktivitas: actionMsg,
+              tanggal: new Date().toISOString()
+           }]);
+        }
         
         if (newStatus !== 'in_progress') {
            addNotification(`Status naskah berhasil diperbarui di database.`);

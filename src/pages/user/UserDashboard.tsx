@@ -115,14 +115,12 @@ export default function UserDashboard() {
         const { createClient } = await import('@supabase/supabase-js');
         const supabase = createClient(config.supabaseUrl, config.supabaseKey);
         
-        const newActivityObj = {
-          id: Math.random().toString(), // temp ID
+        const newActivityObj: any = {
           nip: user.username,
           aktivitas: activity,
           tanggal: new Date().toISOString()
         };
-
-        const { error } = await supabase.from('kinerja_harian').insert([newActivityObj]);
+        const { data, error } = await supabase.from('kinerja_harian').insert([newActivityObj]).select();
 
         if (error) throw error;
         
@@ -130,7 +128,7 @@ export default function UserDashboard() {
         const currentInputsCount = Math.round((performancePercentage / 100) * workingDays);
         const newInputs = currentInputsCount + 1;
         setPerformancePercentage(workingDays > 0 ? Math.round((newInputs / workingDays) * 100) : 0);
-        setRecentActivities(prev => [newActivityObj, ...prev].slice(0, 5));
+        setRecentActivities(prev => [data && data.length > 0 ? data[0] : { ...newActivityObj, id: crypto.randomUUID() }, ...prev].slice(0, 5));
         addNotification('Jurnal kinerja harian berhasil dicatat dan disimpan di database.');
       } catch (err: any) {
         console.error("Error saving activity:", err);
