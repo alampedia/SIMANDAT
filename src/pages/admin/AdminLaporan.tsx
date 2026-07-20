@@ -1,23 +1,84 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { useAppContext } from '../../context/AppContext';
 
-const dataKinerja = [
-  { name: 'Minggu 1', selesai: 12, terlambat: 2 },
-  { name: 'Minggu 2', selesai: 19, terlambat: 1 },
-  { name: 'Minggu 3', selesai: 15, terlambat: 4 },
-  { name: 'Minggu 4', selesai: 22, terlambat: 0 },
-];
-
-const dataDistribusi = [
-  { name: 'Seksi Pemerintahan', jumlah: 45 },
-  { name: 'Seksi Kesos', jumlah: 30 },
-  { name: 'Seksi Trantib', jumlah: 20 },
-  { name: 'Subbag Umum', jumlah: 15 },
-];
-
 export default function AdminLaporan() {
-  const { config } = useAppContext();
+  const { config, tasks, usersList } = useAppContext();
+
+  const dataKinerja = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    
+    // Initialize 4 weeks
+    const weeks = [
+      { name: 'Minggu 1', selesai: 0, terlambat: 0 },
+      { name: 'Minggu 2', selesai: 0, terlambat: 0 },
+      { name: 'Minggu 3', selesai: 0, terlambat: 0 },
+      { name: 'Minggu 4', selesai: 0, terlambat: 0 },
+      { name: 'Minggu 5', selesai: 0, terlambat: 0 },
+    ];
+
+    tasks.forEach(task => {
+      const taskDate = new Date(task.date);
+      if (taskDate.getMonth() === currentMonth && taskDate.getFullYear() === currentYear) {
+        const weekIndex = Math.min(Math.floor((taskDate.getDate() - 1) / 7), 4);
+        
+        let isCompleted = task.status === 'completed';
+        let isLate = false;
+        
+        if (task.deadline) {
+          const deadlineDate = new Date(task.deadline);
+          
+          if (isCompleted) {
+             // Find completion date from history
+             const completedLog = task.history?.find(h => h.action.toLowerCase().includes('diselesaikan'));
+             const completionDate = completedLog ? new Date(completedLog.date) : new Date(); // fallback
+             if (completionDate > deadlineDate) {
+                 isLate = true;
+             }
+          } else {
+             if (now > deadlineDate) {
+                 isLate = true;
+             }
+          }
+        }
+        
+        if (isCompleted && !isLate) {
+           weeks[weekIndex].selesai += 1;
+        } else if (isLate) {
+           weeks[weekIndex].terlambat += 1;
+        } else if (isCompleted && isLate) {
+           weeks[weekIndex].selesai += 1;
+           weeks[weekIndex].terlambat += 1;
+        }
+      }
+    });
+
+    return weeks.filter(w => w.selesai > 0 || w.terlambat > 0 || w.name !== 'Minggu 5'); // keep up to 4 if 5 is empty
+  }, [tasks]);
+
+  const dataDistribusi = useMemo(() => {
+     const bebanKerja: Record<string, number> = {};
+     
+     tasks.forEach(task => {
+        if (task.assignedTo) {
+           const user = usersList.find(u => u.name === task.assignedTo || u.username === task.assignedTo);
+           if (user && user.unitOrganisasi) {
+              const unit = user.unitOrganisasi;
+              bebanKerja[unit] = (bebanKerja[unit] || 0) + 1;
+           } else {
+              bebanKerja['Lainnya'] = (bebanKerja['Lainnya'] || 0) + 1;
+           }
+        }
+     });
+     
+     return Object.keys(bebanKerja).map(key => ({
+        name: key,
+        jumlah: bebanKerja[key]
+     })).sort((a, b) => b.jumlah - a.jumlah).slice(0, 7); // top 7
+  }, [tasks, usersList]);
+
 
   return (
     <div className="space-y-6">
