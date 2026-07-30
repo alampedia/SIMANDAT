@@ -1,11 +1,25 @@
 import React from 'react';
 import { useAppContext } from '../../context/AppContext';
-import { LogOut, Moon, Sun } from 'lucide-react';
+import { LogOut, Moon, Sun, Bell } from 'lucide-react';
 import { format } from 'date-fns';
 import { id } from 'date-fns/locale';
 
 export const UserTopHeader = () => {
-  const { user, logout, config, theme, toggleTheme } = useAppContext();
+  const { user, logout, config, theme, toggleTheme, tasks } = useAppContext();
+
+  const roleLower = (user?.role || '').toLowerCase();
+  const isPimpinanPuncak = (roleLower.includes('camat') && !roleLower.includes('sekcam') && !roleLower.includes('sekretaris'));
+  const isReviewer = roleLower.includes('sekcam') || roleLower.includes('sekretaris') || roleLower.includes('wakapolsek') || roleLower.includes('wadanramil') || roleLower.includes('kasdim') || roleLower.includes('kasat');
+  const isPimpinan = isPimpinanPuncak || isReviewer || roleLower === 'admin';
+  const isStaf = !isPimpinanPuncak && !isReviewer && roleLower !== 'admin';
+
+  const pendingTasks = tasks.filter(t => {
+     if (isReviewer) return t.status === 'pending_sekcam';
+     if (isPimpinan) return t.status === 'pending_camat';
+     if (isStaf) return (t.assignedTo === user?.name || t.assignedTo === user?.username) && t.status !== 'completed';
+     return false;
+  }).length;
+
   
   // Formatting date like "Rabu, 22 April 2026"
   const currentDate = new Date();
@@ -39,6 +53,16 @@ export const UserTopHeader = () => {
         </div>
         
         <div className="flex items-center gap-2">
+          <div className="relative">
+             <button className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors">
+                <Bell size={18} />
+             </button>
+             {pendingTasks > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm border border-white">
+                   {pendingTasks}
+                </span>
+             )}
+          </div>
           <button 
             onClick={toggleTheme}
             className="p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors"

@@ -13,13 +13,20 @@ export default function PageDisposisi() {
 
   // Ambil surat yang perlu disposisi sesuai role
   const incomingLetters = tasks.filter(t => {
-    // Filter task by user's OPD if applicable
     if (user?.opd && t.opd && t.opd !== user.opd) return false;
-
     if (isReviewer) return t.status === 'pending_sekcam';
     if (isPimpinan) return t.status === 'pending_camat';
     return false;
   });
+
+  const processedLetters = tasks.filter(t => {
+    if (user?.opd && t.opd && t.opd !== user.opd) return false;
+    if (isReviewer) return t.status !== 'pending_sekcam' && (t.notesSekcam || t.history?.some(h => h.actor === user?.name));
+    if (isPimpinan) return t.status !== 'pending_sekcam' && t.status !== 'pending_camat' && (t.notesCamat || t.history?.some(h => h.actor === user?.name));
+    return false;
+  }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 20); // Limit to recent 20
+  
+  const [activeTab, setActiveTab] = useState<'pending' | 'history'>('pending');
 
   const [selectedTask, setSelectedTask] = useState<typeof tasks[0] | null>(null);
   
@@ -82,18 +89,30 @@ export default function PageDisposisi() {
 
        {!selectedTask ? (
          <div className="space-y-4">
-            <h3 className="text-sm font-bold text-gray-800 uppercase tracking-wide flex items-center gap-2">
-               <Clock size={16} className="text-blue-600" /> Menunggu {isPimpinan ? 'Persetujuan' : 'Arahan'} ({incomingLetters.length})
-            </h3>
+            <div className="flex gap-2 mb-4 border-b border-gray-100 pb-2">
+              <button 
+                onClick={() => setActiveTab('pending')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'pending' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                <Clock size={16} /> Belum Dilaksanakan ({incomingLetters.length})
+              </button>
+              <button 
+                onClick={() => setActiveTab('history')}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'history' ? 'text-green-600 border-b-2 border-green-600 bg-green-50/50' : 'text-gray-500 hover:bg-gray-50'}`}
+              >
+                <CheckCircle2 size={16} /> Sudah Dilaksanakan ({processedLetters.length})
+              </button>
+            </div>
             
-            {incomingLetters.length === 0 ? (
-               <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
-                 <CheckCircle2 size={40} className="text-green-300 mx-auto mb-3" />
-                 <p className="text-gray-500 font-medium">Semua surat sudah diproses.</p>
-               </div>
-            ) : (
-                <div className="grid grid-cols-1 gap-3">
-                  {incomingLetters.map(task => (
+            {activeTab === 'pending' ? (
+              incomingLetters.length === 0 ? (
+                 <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                   <CheckCircle2 size={40} className="text-green-300 mx-auto mb-3" />
+                   <p className="text-gray-500 font-medium">Semua tugas sudah dilaksanakan.</p>
+                 </div>
+              ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {incomingLetters.map(task => (
                     <button 
                       key={task.id} 
                       onClick={() => {
@@ -103,7 +122,7 @@ export default function PageDisposisi() {
                            setDisposisiForm(prev => ({...prev, tujuan: task.assignedTo || ''}));
                         }
                       }}
-                      className="text-left bg-white border border-gray-100 hover:border-blue-300 hover:shadow-md transition-all rounded-2xl p-4 flex flex-col gap-2 relative overflow-hidden group"
+                      className="text-left bg-white border-l-4 border-l-amber-400 border-y border-r border-gray-100 hover:border-r-blue-300 hover:border-y-blue-300 hover:shadow-md transition-all rounded-r-2xl rounded-l-md p-4 flex flex-col gap-2 relative overflow-hidden group"
                     >
                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                           <CheckSquare size={20} className="text-blue-600" />
@@ -126,6 +145,36 @@ export default function PageDisposisi() {
                     </button>
                   ))}
                 </div>
+              )
+            ) : (
+              processedLetters.length === 0 ? (
+                 <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                   <FileCheck size={40} className="text-gray-300 mx-auto mb-3" />
+                   <p className="text-gray-500 font-medium">Belum ada riwayat tugas yang dilaksanakan.</p>
+                 </div>
+              ) : (
+                  <div className="grid grid-cols-1 gap-3">
+                    {processedLetters.map(task => (
+                      <div 
+                        key={task.id}
+                        className="text-left bg-green-50/30 border-l-4 border-l-green-500 border-y border-r border-green-100 rounded-r-2xl rounded-l-md p-4 flex flex-col gap-2 relative"
+                      >
+                         <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded-md bg-green-100 text-green-800 font-bold text-[10px] tracking-wider uppercase border border-green-200">
+                              SUDAH DILAKSANAKAN
+                            </span>
+                            <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy')}</span>
+                         </div>
+                         <h4 className="font-bold text-gray-900 leading-snug">{task.title}</h4>
+                         <p className="text-sm text-gray-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
+                         <p className="text-xs text-gray-600 bg-white p-2 rounded-lg border border-green-50 mt-1">
+                            <span className="font-semibold text-gray-700 block mb-1">Catatan Anda:</span>
+                            {isReviewer ? (task.notesSekcam || 'Telah di-mapping/validasi') : (task.notesCamat || 'Telah disetujui/validasi')}
+                         </p>
+                      </div>
+                    ))}
+                  </div>
+              )
             )}
          </div>
        ) : (
