@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend, Cell } from 'recharts';
 import { useAppContext } from '../../context/AppContext';
 
 export default function AdminLaporan() {
@@ -58,40 +58,60 @@ export default function AdminLaporan() {
     return weeks.filter(w => w.selesai > 0 || w.terlambat > 0 || w.name !== 'Minggu 5'); // keep up to 4 if 5 is empty
   }, [tasks]);
 
-  const dataDistribusi = useMemo(() => {
-     const bebanKerja: Record<string, number> = {};
+      const dataDistribusi = useMemo(() => {
+     // Pre-populate so they always show up with full names
+     const baseBebanKerja: Record<string, number> = {
+        'Seksi Pemerintahan': 0,
+        'Seksi Kesejahteraan Sosial': 0,
+        'Seksi Trantib': 0,
+        'Subbag Umum & Kepegawaian': 0,
+        'Subbag Perencanaan & Keuangan': 0,
+     };
+
+     const normalizeUnit = (unit: string) => {
+        const u = unit.toLowerCase();
+        if (u.includes('kesejahteraan sosial') || u.includes('kesos') || u.includes('pemberdayaan masyarakat')) return 'Seksi Kesejahteraan Sosial';
+        if (u.includes('pemerintahan')) return 'Seksi Pemerintahan';
+        if (u.includes('trantib') || u.includes('ketentraman') || u.includes('ketertiban')) return 'Seksi Trantib';
+        if (u.includes('umum') || u.includes('kepegawaian')) return 'Subbag Umum & Kepegawaian';
+        if (u.includes('perencanaan') || u.includes('keuangan') || u.includes('ppk')) return 'Subbag Perencanaan & Keuangan';
+        return unit; // Fallback
+     };
      
      tasks.forEach(task => {
         if (task.assignedTo) {
            const user = usersList.find(u => u.name === task.assignedTo || u.username === task.assignedTo);
            if (user && user.unitOrganisasi) {
-              const unit = user.unitOrganisasi;
-              bebanKerja[unit] = (bebanKerja[unit] || 0) + 1;
+              const unit = normalizeUnit(user.unitOrganisasi);
+              baseBebanKerja[unit] = (baseBebanKerja[unit] || 0) + 1;
            } else {
-              bebanKerja['Lainnya'] = (bebanKerja['Lainnya'] || 0) + 1;
+              baseBebanKerja['Lainnya'] = (baseBebanKerja['Lainnya'] || 0) + 1;
            }
         }
      });
      
-     return Object.keys(bebanKerja).map(key => ({
+     return Object.keys(baseBebanKerja).map(key => ({
         name: key,
-        jumlah: bebanKerja[key]
+        jumlah: baseBebanKerja[key]
      })).sort((a, b) => b.jumlah - a.jumlah).slice(0, 7); // top 7
   }, [tasks, usersList]);
+
+  const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#64748b'];
+
 
 
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-2xl font-bold text-gray-900">Laporan Kinerja Pegawai</h1>
-        <p className="text-gray-500 text-sm mt-1">Evaluasi tingkat penyelesaian disposisi (Sesuai SOP).</p>
+        <h1 className="text-2xl font-bold text-slate-800">Laporan Kinerja Pegawai</h1>
+        <p className="text-slate-500 text-sm mt-1">Evaluasi tingkat penyelesaian disposisi (Sesuai SOP).</p>
       </header>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {/* Chart 1: Trend Penyelesaian */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-6">Tren Penyelesaian Disposisi (Bulanan)</h2>
+        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm p-6">
+          <h2 className="text-base font-bold text-slate-800 mb-6">Tren Penyelesaian Disposisi (Bulanan)</h2>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dataKinerja} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
@@ -112,21 +132,25 @@ export default function AdminLaporan() {
         </div>
 
         {/* Chart 2: Distribusi Beban */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-base font-bold text-gray-900 mb-6">Distribusi Beban Kerja per Seksi</h2>
+        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm p-6">
+          <h2 className="text-base font-bold text-slate-800 mb-6">Distribusi Beban Kerja per Seksi</h2>
           <div className="h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={dataDistribusi} layout="vertical" margin={{ top: 0, right: 30, left: 20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f3f4f6" />
                 <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#4b5563', fontWeight: 500 }} width={120} />
+                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#4b5563', fontWeight: 600 }} width={180} />
                 <Tooltip 
                   cursor={{ fill: '#f3f4f6' }}
                   contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
                   itemStyle={{ fontSize: '14px', fontWeight: 500 }}
                 />
                 <Legend verticalAlign="top" height={36} wrapperStyle={{ fontSize: '12px', fontWeight: 'bold' }} />
-                <Bar dataKey="jumlah" name="Jumlah Surat/Tugas" fill={config.primaryColor} radius={[0, 4, 4, 0]} barSize={24} label={{ position: 'right', fill: '#4b5563', fontSize: 12, fontWeight: 'bold' }} />
+                <Bar dataKey="jumlah" name="Jumlah Surat/Tugas" radius={[0, 4, 4, 0]} barSize={24} label={{ position: 'right', fill: '#4b5563', fontSize: 12, fontWeight: 'bold' }}>
+                  {dataDistribusi.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -134,7 +158,7 @@ export default function AdminLaporan() {
 
       </div>
     
-      <div className="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-xl text-sm flex gap-3 items-start">
+      <div className="bg-blue-50 border border-blue-100 text-blue-800 p-4 rounded-[16px] text-sm flex gap-3 items-start">
          <div className="mt-0.5 font-bold">INFO:</div>
          <p>Laporan ini merupakan bagian dari Feedback Loop (Tahap 6 SOP). Data yang terlambat ('merah') akan memicu alert otomatis ke staf bersangkutan melalui integrasi bot WA (jika dikonfigurasi).</p>
       </div>

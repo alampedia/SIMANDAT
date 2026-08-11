@@ -10,7 +10,7 @@ export default function MobileAppLayout() {
       <ToastContainer />
       
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden lg:block w-64 bg-white border-r border-gray-100 flex-shrink-0 h-screen sticky top-0 relative z-20">
+      <div className="hidden lg:block w-64 bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm flex-shrink-0 h-screen sticky top-0 relative z-20">
          <div className="h-full pt-6">
             <BottomNav desktopMode={true} />
          </div>

@@ -168,7 +168,7 @@ export default function UserDashboard() {
           
           {/* 2B. Kinerja Bulanan & Aktivitas Terakhir (SEMUA PENGGUNA) */}
           <div 
-            className="rounded-2xl p-4 text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[160px]"
+            className="rounded-[20px] p-4 text-white shadow-xl relative overflow-hidden flex flex-col justify-between min-h-[160px]"
             style={{ 
               background: `linear-gradient(135deg, ${config.primaryColor} 0%, #312e81 100%)` 
             }}
@@ -178,7 +178,7 @@ export default function UserDashboard() {
             <div className="flex flex-col relative z-10 gap-3">
               {/* Top row with Title */}
               <div className="flex items-center gap-1.5">
-                <ClipboardList size={14} className="opacity-80 drop-shadow-sm" />
+                <ClipboardList size={14} className="opacity-80 drop-shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]" />
                 <h3 className="text-[10px] font-medium text-white/90 tracking-wide uppercase">Kinerja Bulanan</h3>
               </div>
               
@@ -186,7 +186,7 @@ export default function UserDashboard() {
               <div className="flex items-center gap-2">
                 <span className="text-3xl sm:text-4xl font-extrabold tracking-tight drop-shadow-md leading-none">{performancePercentage}%</span>
                 <div 
-                  className="bg-white/20 backdrop-blur-md rounded-full w-6 h-6 flex items-center justify-center shadow-sm border border-white/20" 
+                  className="bg-white/20 backdrop-blur-md rounded-full w-6 h-6 flex items-center justify-center shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white/20" 
                   title={`Status Kinerja: ${trendTitle}`}
                 >
                   <TrendIcon size={14} className={trendColor} strokeWidth={2.5} />
@@ -207,12 +207,12 @@ export default function UserDashboard() {
       {isPimpinan && (
         <div className="space-y-6">
           {isPimpinanPuncak && (
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm overflow-hidden">
               <div 
                 className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => setIsPersetujuanOpen(!isPersetujuanOpen)}
               >
-                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
                     <FileText size={18} className="text-blue-600" /> Naskah Dinas Perlu Persetujuan (Approve)
                  </h3>
                  <div className="flex items-center gap-3">
@@ -224,22 +224,22 @@ export default function UserDashboard() {
               {isPersetujuanOpen && (
                 <div className="p-6 pt-0 space-y-3">
                    {incomingCamatTasks.length === 0 ? (
-                      <div className="p-4 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                      <div className="p-4 text-center text-sm text-slate-500 bg-gray-50 rounded-[20px] border border-dashed border-gray-200">
                          Tidak ada naskah dinas yang perlu persetujuan saat ini.
                       </div>
                    ) : (
                       <div className="space-y-3">
                         {incomingCamatTasks.map(task => (
-                          <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:bg-blue-50/50 transition-colors">
+                          <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-[16px] border border-slate-200/60 hover:bg-blue-50/50 transition-colors">
                             <div>
                                <div className="flex items-center gap-2 mb-1">
                                   <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-blue-100">{task.nomorSurat || task.id}</span>
-                                  <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
+                                  <span className="text-[11px] text-slate-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
                                </div>
-                               <h4 className="font-bold text-gray-900 text-sm">{task.title}</h4>
-                               <p className="text-xs text-gray-600 line-clamp-1"><span className="font-semibold text-gray-800">Usulan Target:</span> {task.assignedTo}</p>
+                               <h4 className="font-bold text-slate-800 text-sm">{task.title}</h4>
+                               <p className="text-xs text-slate-500 line-clamp-1"><span className="font-semibold text-slate-700">Usulan Target:</span> {task.assignedTo}</p>
                             </div>
-                            <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer block">
+                            <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white text-xs font-bold rounded-lg shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] transition-colors cursor-pointer block">
                                Buka Halaman Validasi
                             </Link>
                           </div>
@@ -252,12 +252,12 @@ export default function UserDashboard() {
           )}
 
           {isReviewer && (
-            <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm overflow-hidden">
               <div 
                 className="flex items-center justify-between p-6 cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => setIsDelegasiOpen(!isDelegasiOpen)}
               >
-                 <h3 className="font-bold text-gray-900 flex items-center gap-2">
+                 <h3 className="font-bold text-slate-800 flex items-center gap-2">
                     <FileCheck2 size={18} className="text-emerald-600" /> Disposisi Masuk (Mapping/Verifikasi)
                  </h3>
                  <div className="flex items-center gap-3">
@@ -268,25 +268,25 @@ export default function UserDashboard() {
               
               {isDelegasiOpen && (
                 <div className="p-6 pt-0">
-                  <p className="text-sm text-gray-600 mb-4 font-medium">Petakan naskah dinas masuk kepada target pejabat/staf bersangkutan dan ajukan rincian ke pimpinan.</p>
+                  <p className="text-sm text-slate-500 mb-4 font-medium">Petakan naskah dinas masuk kepada target pejabat/staf bersangkutan dan ajukan rincian ke pimpinan.</p>
                   <div className="space-y-3">
                      {incomingSekcamTasks.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <div className="p-4 text-center text-sm text-slate-500 bg-gray-50 rounded-[20px] border border-dashed border-gray-200">
                            Tidak ada disposisi yang perlu diproses saat ini.
                         </div>
                      ) : (
                         <div className="space-y-3">
                           {incomingSekcamTasks.map(task => (
-                            <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100 hover:bg-emerald-50/50 transition-colors">
+                            <div key={task.id} className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-gray-50 p-4 rounded-[16px] border border-slate-200/60 hover:bg-emerald-50/50 transition-colors">
                               <div>
                                  <div className="flex items-center gap-2 mb-1">
                                     <span className="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-emerald-100">{task.nomorSurat || task.id}</span>
-                                    <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
+                                    <span className="text-[11px] text-slate-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
                                  </div>
-                                 <h4 className="font-bold text-gray-900 text-sm">{task.title}</h4>
-                                 <p className="text-xs text-gray-600 line-clamp-1"><span className="font-semibold text-gray-500">Dari:</span> {task.sender}</p>
+                                 <h4 className="font-bold text-slate-800 text-sm">{task.title}</h4>
+                                 <p className="text-xs text-slate-500 line-clamp-1"><span className="font-semibold text-slate-500">Dari:</span> {task.sender}</p>
                               </div>
-                              <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-sm transition-colors cursor-pointer block">
+                              <Link to="/disposisi" className="shrink-0 w-full sm:w-auto text-center px-4 py-2 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white text-xs font-bold rounded-lg shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] transition-colors cursor-pointer block">
                                  Buka Form Mapping
                               </Link>
                             </div>
@@ -303,22 +303,22 @@ export default function UserDashboard() {
 
       {/* DASHBOARD KOTAK TUGAS SAYA */}
       {(!isPimpinanPuncak && role !== 'admin') && (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm overflow-hidden">
           <div 
-            className="p-5 lg:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors"
+            className="p-5 lg:p-6 border-b border-slate-200/60 flex items-center justify-between bg-gray-50/50 cursor-pointer hover:bg-gray-100/50 transition-colors"
             onClick={() => setIsTugasOpen(!isTugasOpen)}
           >
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl shadow-sm">
+              <div className="p-2.5 bg-blue-50 text-blue-600 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
                 <FileText size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 text-base">Kotak Tugas Saya</h3>
-                <p className="text-xs text-gray-500 font-medium">Selesaikan tugas sebelum tenggat waktu</p>
+                <h3 className="font-bold text-slate-800 text-base">Kotak Tugas Saya</h3>
+                <p className="text-xs text-slate-500 font-medium">Selesaikan tugas sebelum tenggat waktu</p>
               </div>
             </div>
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-3">
-              <div className="bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-sm flex items-center gap-2">
+              <div className="bg-white px-3 py-1.5 rounded-lg border border-gray-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] flex items-center gap-2">
                 <span className="relative flex h-2.5 w-2.5">
                   {activeTasksCount > 0 && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>}
                   <span className={cn("relative inline-flex rounded-full h-2.5 w-2.5", activeTasksCount > 0 ? "bg-red-500" : "bg-green-500")}></span>
@@ -332,19 +332,19 @@ export default function UserDashboard() {
           </div>
 
           {isTugasOpen && (
-            <div className="p-0 border-t border-gray-100">
+            <div className="p-0 border-t border-slate-200/60">
               {activeTasksCount === 0 ? (
               <div className="p-8 text-center flex flex-col items-center justify-center">
-                 <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mb-3">
+                 <div className="w-16 h-16 bg-gray-50 rounded-[20px] flex items-center justify-center mb-3">
                     <CheckCircle size={32} className="text-green-400" />
                  </div>
-                 <p className="text-gray-900 font-bold">Semua tugas telah selesai!</p>
-                 <p className="text-sm text-gray-500 mt-1">Anda tidak memiliki tugas prioritas saat ini.</p>
+                 <p className="text-slate-800 font-bold">Semua tugas telah selesai!</p>
+                 <p className="text-sm text-slate-500 mt-1">Anda tidak memiliki tugas prioritas saat ini.</p>
               </div>
             ) : (
               <div className="w-full">
                 {/* Table Header (Desktop only) */}
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50/80 border-b border-gray-100 text-xs font-bold text-gray-500 uppercase tracking-wider">
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50/80 border-b border-slate-200/60 text-xs font-bold text-slate-500 uppercase tracking-wider">
                   <div className="col-span-4">Detail Dokumen / Tugas</div>
                   <div className="col-span-4">Instruksi Arahan</div>
                   <div className="col-span-2">Prioritas</div>
@@ -359,7 +359,7 @@ export default function UserDashboard() {
                         {/* Column 1: Dokumen / Title */}
                         <div className="col-span-1 md:col-span-4 flex flex-col items-start gap-1">
                           <span className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-md uppercase tracking-wide border border-blue-100 mb-1">{task.id}</span>
-                          <h4 className="font-bold text-gray-900 text-sm leading-snug">{task.title}</h4>
+                          <h4 className="font-bold text-slate-800 text-sm leading-snug">{task.title}</h4>
                           {task.driveUrl && (
                              <a href={task.driveUrl} target="_blank" rel="noopener noreferrer" className="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-1 rounded-md mt-1 hover:bg-blue-100">Buka Lampiran Drive</a>
                           )}
@@ -368,7 +368,7 @@ export default function UserDashboard() {
                         {/* Column 2: Instruksi */}
                         <div className="col-span-1 md:col-span-4">
                           <div className="inline-flex md:hidden text-[10px] uppercase font-bold text-gray-400 mb-1">Instruksi Arahan:</div>
-                          <p className="text-xs text-gray-600 font-medium line-clamp-2 md:line-clamp-3 bg-gray-50 md:bg-transparent p-2 md:p-0 rounded-lg">{task.instructions || 'Segera tindak lanjuti sesuai prosedur.'}</p>
+                          <p className="text-xs text-slate-500 font-medium line-clamp-2 md:line-clamp-3 bg-gray-50 md:bg-transparent p-2 md:p-0 rounded-lg">{task.instructions || 'Segera tindak lanjuti sesuai prosedur.'}</p>
                         </div>
                         
                         {/* Column 3: Status / Prioritas */}
@@ -387,15 +387,15 @@ export default function UserDashboard() {
                         
                         {/* Column 4: Aksi */}
                         <div className="col-span-1 md:col-span-2 flex flex-col items-end mt-2 md:mt-0 gap-2">
-                          <div className="text-[10px] font-bold text-gray-500 w-full md:text-right">Progres: {task.progress || 0}%</div>
+                          <div className="text-[10px] font-bold text-slate-500 w-full md:text-right">Progres: {task.progress || 0}%</div>
                           <div className="flex bg-gray-100 rounded-lg p-1 w-full justify-between">
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 25)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">25%</button>
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 50)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">50%</button>
-                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 75)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-sm font-bold text-gray-700">75%</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 25)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] font-bold text-gray-700">25%</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 50)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] font-bold text-gray-700">50%</button>
+                             <button onClick={() => updateTaskStatus(task.id, 'in_progress', 'Update progres', undefined, 75)} className="text-[10px] px-2 py-1 rounded hover:bg-white hover:shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] font-bold text-gray-700">75%</button>
                           </div>
                           <button 
                              onClick={() => setFeedbackTaskId(task.id)}
-                            className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md transition-all active:scale-95 group-hover:-translate-y-0.5"
+                            className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white px-4 py-2 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-md transition-all active:scale-95 group-hover:-translate-y-0.5"
                             style={{ backgroundColor: config.primaryColor }}
                           >
                             <CheckCircle2 size={14} /> 
@@ -404,7 +404,7 @@ export default function UserDashboard() {
                           {isManager && (
                             <button
                               onClick={() => setDisposisiModalOpen(task)}
-                              className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-indigo-600 px-4 py-2 rounded-xl shadow-sm hover:bg-indigo-700 transition-all active:scale-95 mt-0 md:mt-2"
+                              className="w-full md:w-auto flex items-center justify-center gap-1.5 text-xs font-bold text-white bg-indigo-600 px-4 py-2 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:bg-indigo-700 transition-all active:scale-95 mt-0 md:mt-2"
                             >
                               <Send size={14} /> 
                               Mapping Bawahan
@@ -424,18 +424,18 @@ export default function UserDashboard() {
       
       {/* KASI / KABAG MAPPING BLOCK */}
       {isManager && (
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mt-6">
-          <div className="p-5 lg:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+        <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm overflow-hidden mt-6">
+          <div className="p-5 lg:p-6 border-b border-slate-200/60 flex items-center justify-between bg-gray-50/50">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl shadow-sm">
+              <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
                 <FileCheck2 size={20} />
               </div>
               <div>
-                <h3 className="font-bold text-gray-900 text-base">Pemetaan / Mapping Staf</h3>
-                <p className="text-xs text-gray-500 font-medium">Lakukan pemetaan dan disposisi tugas ke pelaksana</p>
+                <h3 className="font-bold text-slate-800 text-base">Pemetaan / Mapping Staf</h3>
+                <p className="text-xs text-slate-500 font-medium">Lakukan pemetaan dan disposisi tugas ke pelaksana</p>
               </div>
             </div>
-            <Link to="/disposisi-masuk" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-xl shadow-sm transition-colors cursor-pointer block">
+            <Link to="/disposisi-masuk" className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white text-xs font-bold rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] transition-colors cursor-pointer block">
                Buka Halaman Pemetaan
             </Link>
           </div>
@@ -446,19 +446,19 @@ export default function UserDashboard() {
       {/* FEEDBACK MODAL */}
       {feedbackTaskId && (
          <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4" onClick={() => setFeedbackTaskId(null)}>
-            <div className="bg-white rounded-3xl shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-[24px] shadow-xl w-full max-w-md p-6" onClick={(e) => e.stopPropagation()}>
                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 bg-green-50 text-green-600 rounded-xl shadow-sm">
+                  <div className="p-2.5 bg-green-50 text-green-600 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
                      <CheckCircle size={20} />
                   </div>
                   <div>
-                    <h3 className="text-lg font-bold text-gray-900">Selesaikan Tugas</h3>
-                    <p className="text-sm text-gray-500 font-medium">Beri laporan / respons kepada pimpinan.</p>
+                    <h3 className="text-lg font-bold text-slate-800">Selesaikan Tugas</h3>
+                    <p className="text-sm text-slate-500 font-medium">Beri laporan / respons kepada pimpinan.</p>
                   </div>
                </div>
                
                <textarea
-                  className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:border-transparent outline-none resize-none transition-all duration-300 mb-4"
+                  className="w-full bg-gray-50 border border-gray-200 rounded-[20px] p-4 text-sm text-slate-700 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:border-transparent outline-none resize-none transition-all duration-300 mb-4"
                   style={{ '--tw-ring-color': config.primaryColor } as any}
                   rows={4}
                   placeholder="(Opsional) Tulis laporan singkat pelaksanaan tugas, kendala, atau feedback untuk atasan..."
@@ -469,13 +469,13 @@ export default function UserDashboard() {
                <div className="flex justify-end gap-3">
                   <button 
                      onClick={() => setFeedbackTaskId(null)}
-                     className="px-4 py-2 rounded-xl font-bold text-gray-600 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all"
+                     className="px-4 py-2 rounded-[16px] font-bold text-slate-500 bg-gray-100 hover:bg-gray-200 active:scale-95 transition-all"
                   >
                      Batal
                   </button>
                   <button 
                      onClick={submitCompletionFeedback}
-                     className="px-4 py-2 flex items-center gap-2 rounded-xl font-bold text-white shadow-sm hover:shadow-md active:scale-95 transition-all"
+                     className="px-4 py-2 flex items-center gap-2 rounded-[16px] font-bold text-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:shadow-md active:scale-95 transition-all"
                      style={{ backgroundColor: config.primaryColor }}
                   >
                      <Send size={16} /> Laporkan Selesai
@@ -486,18 +486,18 @@ export default function UserDashboard() {
       )}
 
       {/* 3. AKTIVITAS HARIAN FORM (Isian Mandiri Semua User) */}
-      <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+      <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm p-6">
         <div className="flex items-center gap-2 mb-4">
-          <div className="p-2 bg-gray-50 text-gray-600 rounded-xl">
+          <div className="p-2 bg-gray-50 text-slate-500 rounded-[16px]">
             <ClipboardList size={20} />
           </div>
-          <h3 className="font-bold text-gray-900">Jurnal Kinerja (Input Uraian)</h3>
+          <h3 className="font-bold text-slate-800">Jurnal Kinerja (Input Uraian)</h3>
         </div>
-        <p className="text-sm text-gray-500 mb-4 font-medium">Isian mandiri berupa uraian kegiatan harian yang akan terekap di modul Cetak Kinerja Harian.</p>
+        <p className="text-sm text-slate-500 mb-4 font-medium">Isian mandiri berupa uraian kegiatan harian yang akan terekap di modul Cetak Kinerja Harian.</p>
         
         <form onSubmit={handleSubmitActivity}>
           <textarea
-            className="w-full bg-gray-50 border border-gray-200 rounded-2xl p-4 text-sm text-gray-800 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:border-transparent outline-none resize-none transition-all duration-300 shadow-inner"
+            className="w-full bg-gray-50 border border-gray-200 rounded-[20px] p-4 text-sm text-slate-700 placeholder:text-gray-400 focus:bg-white focus:ring-2 focus:border-transparent outline-none resize-none transition-all duration-300 shadow-inner"
             style={{ '--tw-ring-color': config.primaryColor } as any}
             rows={4}
             placeholder="Contoh: Menyelesaikan laporan warga, mengikuti diklat online, melayani administrasi..."
@@ -508,7 +508,7 @@ export default function UserDashboard() {
           <div className="flex justify-end mt-4">
             <button
               type="submit"
-              className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-2.5 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-95"
+              className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-2.5 rounded-[16px] transition-all shadow-md hover:shadow-lg active:scale-95"
               style={{ backgroundColor: config.primaryColor }}
             >
               Catat Jurnal
@@ -518,19 +518,19 @@ export default function UserDashboard() {
         </form>
         
         {recentActivities.length > 0 && (
-           <div className="mt-8 pt-6 border-t border-gray-100">
-              <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+           <div className="mt-8 pt-6 border-t border-slate-200/60">
+              <h4 className="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
                  <ClipboardList size={16} className="text-blue-600" />
                  Daftar Uraian Tugas Terealisasi (Terbaru)
               </h4>
               <div className="space-y-3">
                  {recentActivities.map((act) => (
-                    <div key={act.id} className="p-3.5 bg-gray-50 rounded-xl border border-gray-100 flex items-start gap-3">
+                    <div key={act.id} className="p-3.5 bg-gray-50 rounded-[16px] border border-slate-200/60 flex items-start gap-3">
                        <div className="p-1.5 bg-green-100 text-green-600 rounded-lg shrink-0 mt-0.5">
                           <CheckCircle2 size={14} />
                        </div>
                        <div className="flex-1">
-                          <p className="text-sm font-medium text-gray-800 leading-snug">{act.aktivitas}</p>
+                          <p className="text-sm font-medium text-slate-700 leading-snug">{act.aktivitas}</p>
                           <span className="text-[10px] uppercase font-bold text-gray-400 mt-1.5 block">
                              {format(new Date(act.tanggal || new Date()), 'dd MMM yyyy, HH:mm', { locale: localeId })}
                           </span>
@@ -547,9 +547,9 @@ export default function UserDashboard() {
       {disposisiModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm" onClick={() => setDisposisiModalOpen(null)}></div>
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
-            <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
-              <h2 className="font-bold text-gray-900 text-lg">Disposisi ke Staf / Pelaksana</h2>
+          <div className="relative bg-white rounded-[24px] shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="px-6 py-4 border-b border-slate-200/60 flex items-center justify-between bg-white z-10">
+              <h2 className="font-bold text-slate-800 text-lg">Disposisi ke Staf / Pelaksana</h2>
               <button onClick={() => setDisposisiModalOpen(null)} className="text-gray-400 hover:text-red-500 transition-colors p-2 -mr-2">
                 <X size={20} />
               </button>
@@ -571,7 +571,7 @@ export default function UserDashboard() {
                       required
                       value={disposisiForm.tujuan}
                       onChange={e => setDisposisiForm({...disposisiForm, tujuan: e.target.value})}
-                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      className="w-full appearance-none bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
                     >
                       <option value="" disabled>-- Pilih Staf --</option>
                       {usersList.filter(u => {
@@ -595,12 +595,12 @@ export default function UserDashboard() {
                     type="text"
                     value={disposisiForm.instruksi}
                     onChange={e => setDisposisiForm({...disposisiForm, instruksi: e.target.value})}
-                    className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
+                    className="w-full bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] px-4 py-2.5 outline-none focus:ring-2 focus:border-transparent transition-all"
                   />
                 </div>
                 <div className="pt-4 flex justify-end gap-2">
-                  <button type="button" onClick={() => setDisposisiModalOpen(null)} className="px-4 py-2 text-sm font-bold text-gray-600 hover:bg-gray-50 rounded-xl border border-gray-200">Batal</button>
-                  <button type="submit" className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-xl shadow-sm hover:bg-indigo-700 flex items-center gap-2"><Send size={14}/> Teruskan</button>
+                  <button type="button" onClick={() => setDisposisiModalOpen(null)} className="px-4 py-2 text-sm font-bold text-slate-500 hover:bg-gray-50 rounded-[16px] border border-gray-200">Batal</button>
+                  <button type="submit" className="px-6 py-2 text-sm font-bold text-white bg-indigo-600 rounded-[16px] shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] hover:bg-indigo-700 flex items-center gap-2"><Send size={14}/> Teruskan</button>
                 </div>
               </form>
             </div>

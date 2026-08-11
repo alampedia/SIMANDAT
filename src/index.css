@@ -1,9 +1,9 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
   --color-primary: #2563eb; /* Default blue */
-  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 @theme {
@@ -22,7 +22,7 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: #f3f4f6; /* gray-100 */
+  background-color: #f8fafc; /* slate-50 */
   color: #111827; /* gray-900 */
 }
 
@@ -117,4 +117,13 @@ html.dark .hover\:bg-gray-50:hover {
 
 html.dark .hover\:bg-gray-100:hover {
   background-color: #4b5563 !important;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-xl border border-white/50 shadow-sm;
+  }
+  html.dark .glass-panel {
+    @apply bg-gray-900/70 border-gray-700/50;
+  }
 }

@@ -77,10 +77,10 @@ export default function PageDisposisi() {
   return (
     <div className="space-y-6 lg:px-4 pb-10">
        <header className="mb-2">
-         <h1 className="text-2xl font-bold text-gray-900">
+         <h1 className="text-2xl font-bold text-slate-800">
             {isReviewer ? 'Mapping / Disposisi' : 'Validasi Disposisi Pimpinan'}
          </h1>
-         <p className="text-gray-500 text-sm">
+         <p className="text-slate-500 text-sm">
             {isReviewer 
                ? 'Pilih tujuan dan beri draf arahan untuk disetujui Pimpinan.'
                : 'Berikan persetujuan untuk surat yang telah di-mapping oleh Sekcam/Wakil.'}
@@ -89,16 +89,16 @@ export default function PageDisposisi() {
 
        {!selectedTask ? (
          <div className="space-y-4">
-            <div className="flex gap-2 mb-4 border-b border-gray-100 pb-2">
+            <div className="flex gap-2 mb-4 border-b border-slate-200/60 pb-2">
               <button 
                 onClick={() => setActiveTab('pending')}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'pending' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-gray-500 hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'pending' ? 'text-blue-600 border-b-2 border-blue-600 bg-blue-50/50' : 'text-slate-500 hover:bg-gray-50'}`}
               >
                 <Clock size={16} /> Belum Dilaksanakan ({incomingLetters.length})
               </button>
               <button 
                 onClick={() => setActiveTab('history')}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'history' ? 'text-green-600 border-b-2 border-green-600 bg-green-50/50' : 'text-gray-500 hover:bg-gray-50'}`}
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-bold rounded-t-lg transition-colors ${activeTab === 'history' ? 'text-green-600 border-b-2 border-green-600 bg-green-50/50' : 'text-slate-500 hover:bg-gray-50'}`}
               >
                 <CheckCircle2 size={16} /> Sudah Dilaksanakan ({processedLetters.length})
               </button>
@@ -106,9 +106,9 @@ export default function PageDisposisi() {
             
             {activeTab === 'pending' ? (
               incomingLetters.length === 0 ? (
-                 <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                 <div className="text-center py-12 bg-white rounded-[24px] border border-dashed border-gray-200">
                    <CheckCircle2 size={40} className="text-green-300 mx-auto mb-3" />
-                   <p className="text-gray-500 font-medium">Semua tugas sudah dilaksanakan.</p>
+                   <p className="text-slate-500 font-medium">Semua tugas sudah dilaksanakan.</p>
                  </div>
               ) : (
                   <div className="grid grid-cols-1 gap-3">
@@ -122,7 +122,7 @@ export default function PageDisposisi() {
                            setDisposisiForm(prev => ({...prev, tujuan: task.assignedTo || ''}));
                         }
                       }}
-                      className="text-left bg-white border-l-4 border-l-amber-400 border-y border-r border-gray-100 hover:border-r-blue-300 hover:border-y-blue-300 hover:shadow-md transition-all rounded-r-2xl rounded-l-md p-4 flex flex-col gap-2 relative overflow-hidden group"
+                      className="text-left bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm hover:border-r-blue-300 hover:border-y-blue-300 hover:shadow-md transition-all rounded-r-2xl rounded-l-md p-4 flex flex-col gap-2 relative overflow-hidden group"
                     >
                        <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
                           <CheckSquare size={20} className="text-blue-600" />
@@ -132,14 +132,14 @@ export default function PageDisposisi() {
                           <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px] tracking-wider uppercase border border-amber-200">
                             {isPimpinan ? 'BUTUH VALIDASI' : 'BUTUH ARAHAN'}
                           </span>
-                          <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
+                          <span className="text-[11px] text-slate-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy', { locale: localeId })}</span>
                        </div>
                        
-                       <h4 className="font-bold text-gray-900 leading-snug">{task.title}</h4>
-                       <p className="text-sm text-gray-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
+                       <h4 className="font-bold text-slate-800 leading-snug">{task.title}</h4>
+                       <p className="text-sm text-slate-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
                        {isPimpinan && task.assignedTo && (
-                          <div className="mt-2 text-xs bg-gray-50 p-2 rounded-lg border border-gray-100">
-                             <span className="font-bold text-gray-600">Usulan Target:</span> {task.assignedTo}
+                          <div className="mt-2 text-xs bg-gray-50 p-2 rounded-lg border border-slate-200/60">
+                             <span className="font-bold text-slate-500">Usulan Target:</span> {task.assignedTo}
                           </div>
                        )}
                     </button>
@@ -148,9 +148,9 @@ export default function PageDisposisi() {
               )
             ) : (
               processedLetters.length === 0 ? (
-                 <div className="text-center py-12 bg-white rounded-3xl border border-dashed border-gray-200">
+                 <div className="text-center py-12 bg-white rounded-[24px] border border-dashed border-gray-200">
                    <FileCheck size={40} className="text-gray-300 mx-auto mb-3" />
-                   <p className="text-gray-500 font-medium">Belum ada riwayat tugas yang dilaksanakan.</p>
+                   <p className="text-slate-500 font-medium">Belum ada riwayat tugas yang dilaksanakan.</p>
                  </div>
               ) : (
                   <div className="grid grid-cols-1 gap-3">
@@ -163,11 +163,11 @@ export default function PageDisposisi() {
                             <span className="px-2 py-0.5 rounded-md bg-green-100 text-green-800 font-bold text-[10px] tracking-wider uppercase border border-green-200">
                               SUDAH DILAKSANAKAN
                             </span>
-                            <span className="text-[11px] text-gray-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy')}</span>
+                            <span className="text-[11px] text-slate-500 font-medium">{format(new Date(task.date), 'dd MMM yyyy')}</span>
                          </div>
-                         <h4 className="font-bold text-gray-900 leading-snug">{task.title}</h4>
-                         <p className="text-sm text-gray-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
-                         <p className="text-xs text-gray-600 bg-white p-2 rounded-lg border border-green-50 mt-1">
+                         <h4 className="font-bold text-slate-800 leading-snug">{task.title}</h4>
+                         <p className="text-sm text-slate-500 line-clamp-1"><span className="font-semibold text-gray-700">Dari:</span> {task.sender}</p>
+                         <p className="text-xs text-slate-500 bg-white p-2 rounded-lg border border-green-50 mt-1">
                             <span className="font-semibold text-gray-700 block mb-1">Catatan Anda:</span>
                             {isReviewer ? (task.notesSekcam || 'Telah di-mapping/validasi') : (task.notesCamat || 'Telah disetujui/validasi')}
                          </p>
@@ -178,7 +178,7 @@ export default function PageDisposisi() {
             )}
          </div>
        ) : (
-         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-5 md:p-6 mb-6">
+         <div className="bg-white/95 backdrop-blur-xl border border-slate-200/50 shadow-sm shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] p-5 md:p-6 mb-6">
             <button 
                onClick={() => setSelectedTask(null)}
                className="text-sm font-medium text-blue-600 mb-4 flex items-center gap-1 hover:underline w-fit"
@@ -186,10 +186,10 @@ export default function PageDisposisi() {
                ← Kembali ke Kotak Masuk
             </button>
             
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 mb-6">
+            <div className="bg-gray-50 border border-gray-200 rounded-[20px] p-4 mb-6">
                <span className="text-xs uppercase tracking-wider font-bold text-gray-400 block mb-1">Rincian Surat</span>
-               <h3 className="font-bold text-lg text-gray-900 mb-1">{selectedTask.title}</h3>
-               <p className="text-sm text-gray-600">Pengirim: {selectedTask.sender}</p>
+               <h3 className="font-bold text-lg text-slate-800 mb-1">{selectedTask.title}</h3>
+               <p className="text-sm text-slate-500">Pengirim: {selectedTask.sender}</p>
                {selectedTask.driveUrl && ( 
                   <button type="button" onClick={() => window.open(selectedTask.driveUrl, "_blank")} className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors"> 
                      <LinkIcon size={14} /> 
@@ -197,7 +197,7 @@ export default function PageDisposisi() {
                   </button> 
                )}
                {selectedTask.notesSekcam && (
-                  <div className="mt-3 text-sm text-gray-700 bg-white p-3 rounded-xl border border-gray-200 shadow-sm">
+                  <div className="mt-3 text-sm text-gray-700 bg-white p-3 rounded-[16px] border border-gray-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)]">
                      <span className="font-bold block mb-1 text-xs uppercase text-blue-600">Catatan Sekcam/Wakil:</span>
                      {selectedTask.notesSekcam}
                   </div>
@@ -205,7 +205,7 @@ export default function PageDisposisi() {
             </div>
 
             <form onSubmit={handleDisposisi} className="space-y-5">
-               <h3 className="font-bold text-sm uppercase tracking-wide text-gray-800 flex items-center gap-2 border-b border-gray-100 pb-2">
+               <h3 className="font-bold text-sm uppercase tracking-wide text-slate-700 flex items-center gap-2 border-b border-slate-200/60 pb-2">
                  <UserCheck size={16} className="text-blue-600" /> 
                  {isPimpinan ? 'Validasi / Approval Disposisi' : 'Formulir Mapping Disposisi'}
                </h3>
@@ -213,25 +213,25 @@ export default function PageDisposisi() {
                <div>
                  <label className="block text-sm font-bold text-gray-700 mb-2">Target Pejabat / Staf</label>
                  {isReviewer ? (
-                   <div className="mb-3 flex rounded-xl bg-gray-100 p-1">
+                   <div className="mb-3 flex rounded-[16px] bg-gray-100 p-1">
                      <button
                        type="button"
                        onClick={() => { setTargetTab('pegawai'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
-                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'pegawai' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'pegawai' ? 'bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] text-slate-800' : 'text-slate-500 hover:text-gray-700'}`}
                      >
                        Pegawai Kecamatan
                      </button>
                      <button
                        type="button"
                        onClick={() => { setTargetTab('kapolsek'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
-                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'kapolsek' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'kapolsek' ? 'bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] text-slate-800' : 'text-slate-500 hover:text-gray-700'}`}
                      >
                        Kapolsek
                      </button>
                      <button
                        type="button"
                        onClick={() => { setTargetTab('danramil'); setDisposisiForm({...disposisiForm, tujuan: ''}); }}
-                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'danramil' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+                       className={`flex-1 rounded-lg py-2 text-xs font-bold transition-all ${targetTab === 'danramil' ? 'bg-white shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] text-slate-800' : 'text-slate-500 hover:text-gray-700'}`}
                      >
                        Danramil
                      </button>
@@ -242,7 +242,7 @@ export default function PageDisposisi() {
                       required={isReviewer || !selectedTask.assignedTo}
                       value={disposisiForm.tujuan}
                       onChange={(e) => setDisposisiForm({...disposisiForm, tujuan: e.target.value})}
-                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      className="w-full appearance-none bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
                       style={{ '--tw-ring-color': config.primaryColor } as any}
                    >
                       <option value="" disabled>-- Pilih Pejabat / Staf Tujuan --</option>
@@ -278,7 +278,7 @@ export default function PageDisposisi() {
                    <select 
                       value={disposisiForm.instruksi}
                       onChange={(e) => setDisposisiForm({...disposisiForm, instruksi: e.target.value})}
-                      className="w-full appearance-none bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
+                      className="w-full appearance-none bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
                       style={{ '--tw-ring-color': config.primaryColor } as any}
                    >
                       {instruksiOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
@@ -294,7 +294,7 @@ export default function PageDisposisi() {
                     onChange={(e) => setDisposisiForm({...disposisiForm, catatanKhusus: e.target.value})}
                     placeholder={isReviewer ? "Contoh: Tolong siapkan bahan rapat koordinasi..." : "Komentar / Persetujuan tambahan..."}
                     rows={3}
-                    className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all resize-none"
+                    className="w-full bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] px-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all resize-none"
                     style={{ '--tw-ring-color': config.primaryColor } as any}
                  />
                </div>
@@ -311,7 +311,7 @@ export default function PageDisposisi() {
                          value={disposisiForm.linkDrive}
                          onChange={(e) => setDisposisiForm({...disposisiForm, linkDrive: e.target.value})}
                          placeholder="https://docs.google.com/..."
-                         className="w-full bg-white border border-gray-300 text-gray-800 text-sm rounded-xl pl-11 pr-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
+                         className="w-full bg-white border border-gray-300 text-slate-700 text-sm rounded-[16px] pl-11 pr-4 py-3 outline-none focus:ring-2 focus:border-transparent transition-all"
                          style={{ '--tw-ring-color': config.primaryColor } as any}
                        />
                     </div>
@@ -321,7 +321,7 @@ export default function PageDisposisi() {
                <div className="pt-4 flex justify-end">
                   <button 
                      type="submit"
-                     className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-xl shadow-md transition-all active:scale-95"
+                     className="flex items-center gap-2 text-white font-semibold px-6 py-3 rounded-[16px] shadow-md transition-all active:scale-95"
                      style={{ backgroundColor: config.primaryColor }}
                   >
                      {isPimpinan ? (

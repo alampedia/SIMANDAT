@@ -34,11 +34,11 @@ export const UserTopHeader = () => {
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
           {config.appLogo ? (
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center shadow-lg p-1">
-              <img src={config.appLogo} alt="Logo" className="w-full h-full object-contain rounded-xl" />
+            <div className="w-14 h-14 bg-white rounded-[20px] flex items-center justify-center shadow-lg p-1">
+              <img src={config.appLogo} alt="Logo" className="w-full h-full object-contain rounded-[16px]" />
             </div>
           ) : (
-            <div className="w-14 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded-2xl flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.15)] backdrop-blur-[10px] border border-white/30 relative perspective-[1000px] overflow-visible group">
+            <div className="w-14 h-14 bg-gradient-to-br from-white/20 to-white/5 rounded-[20px] flex items-center justify-center shadow-[0_8px_32px_rgba(0,0,0,0.15)] backdrop-blur-[10px] border border-white/30 relative perspective-[1000px] overflow-visible group">
                <div className="w-7 h-7 relative transition-transform duration-700 transform-style-3d group-hover:rotate-x-[20deg] group-hover:rotate-y-[20deg] rotate-x-[10deg] rotate-y-[-15deg]">
                   <div className="absolute inset-0 bg-gradient-to-tr from-white to-blue-50 rounded-md shadow-[inset_0_2px_4px_rgba(255,255,255,0.9),0_10px_20px_rgba(0,0,0,0.3)] z-10 border border-white/50" style={{ transform: 'translateZ(6px)' }} />
                   <div className="absolute inset-0 bg-blue-900 rounded-md opacity-30 blur-sm" style={{ transform: 'translateZ(-6px)' }} />
@@ -58,7 +58,7 @@ export const UserTopHeader = () => {
                 <Bell size={18} />
              </button>
              {pendingTasks > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-sm border border-white">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border border-white">
                    {pendingTasks}
                 </span>
              )}
@@ -79,11 +79,11 @@ export const UserTopHeader = () => {
         </div>
       </div>
 
-      <div className="mt-6 flex justify-between items-end bg-white rounded-t-2xl px-6 py-4 -mx-4 lg:-mx-6 -mb-4 lg:-mb-6 shadow-sm border-b">
-        <h2 className="font-bold text-gray-800 text-lg uppercase tracking-wide" style={{ color: config.primaryColor }}>
+      <div className="mt-6 flex justify-between items-end bg-white rounded-t-[24px] px-6 py-4 -mx-4 lg:-mx-6 -mb-4 lg:-mb-6 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.1)] border-b">
+        <h2 className="font-bold text-slate-700 text-lg uppercase tracking-wide" style={{ color: config.primaryColor }}>
           {config.appName}
         </h2>
-        <div className="text-right text-gray-600">
+        <div className="text-right text-slate-500">
           <p className="text-xs font-medium">{dateStr}</p>
           <p className="text-xl font-bold" style={{ color: config.primaryColor }}>{timeStr}</p>
         </div>
